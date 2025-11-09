@@ -1,0 +1,20 @@
+{% load django_bootstrap5 %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{% block title %}Estudify{% endblock %}</title>
+    {% bootstrap_css %}
+    <link rel="stylesheet" href="/static/css/custom.css">
+    {% block extra_head %}{% endblock %}
+    {% bootstrap_javascript %}
+    <script src="/static/js/app.js" defer></script>
+</head>
+<body class="bg-dark text-white">
+    {% include 'components/header.html' %}
+    <main class="container py-4">
+        {% block content %}{% endblock %}
+    </main>
+</body>
+</html>
