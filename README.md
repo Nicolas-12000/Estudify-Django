@@ -93,9 +93,13 @@ If you want to keep SQLite for now (note: Render's filesystem is ephemeral), do 
 
 1) Build Command (Render service settings)
 
+   Usa una sola línea (sin caracteres de escape) al pegar en la UI de Render. Ejemplo seguro:
+
    ```bash
-   pip install -r requirements.txt && touch db.sqlite3 && chmod 666 db.sqlite3 && python manage.py collectstatic --noinput && python manage.py migrate --noinput
+   pip install -r requirements.txt && touch db.sqlite3 && chmod 666 db.sqlite3 && python manage.py migrate --noinput && python manage.py collectstatic --noinput
    ```
+
+   Nota: evita terminar la línea con una barra invertida (\) al pegar en la caja del Build Command de Render; eso puede generar argumentos vacíos y provocar errores como "Invalid requirement: ''".
 
    This ensures a `db.sqlite3` file exists and is writable during the build/migrate step.
 
