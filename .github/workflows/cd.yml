@@ -9,18 +9,31 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Set up Python
+
+      # Optional: run tests in CI before triggering deploy (recommended)
+      - name: Run tests
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Install dependencies
-        run: python -m pip install --upgrade pip && pip install -r requirements.txt
-      - name: Collect static
-        run: python manage.py collectstatic --noinput
-      - name: Run migrations
-        run: python manage.py migrate --noinput
-      - name: Deploy to Render
-        uses: johnbeynon/render-deploy-action@v0.0.8
-        with:
-          service-id: ${{ secrets.RENDER_SERVICE_ID }}
-          api-key: ${{ secrets.RENDER_API_KEY }}
+
+      - name: Install test dependencies and run tests
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pytest -q
+
+      # Trigger a deploy on Render by calling their Deploys API.
+      - name: Trigger Render deploy
+        env:
+          RENDER_SERVICE_ID: ${{ secrets.RENDER_SERVICE_ID }}
+          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+        run: |
+          echo "Triggering deploy on Render for service: $RENDER_SERVICE_ID"
+          RESPONSE=$(curl -sS -X POST "https://api.render.com/v1/services/${RENDER_SERVICE_ID}/deploys" \
+            -H "Authorization: Bearer ${RENDER_API_KEY}" \
+            -H "Content-Type: application/json" \
+            -d '{}') || true
+          echo "Render API response: $RESPONSE"
+
+      - name: Done
+        run: echo "Render deploy triggered (check Render dashboard for progress)"

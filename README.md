@@ -87,6 +87,37 @@ Nota sobre despliegue automático (CI -> Render)
 
 3. Alternativa manual: en Render Dashboard configura Build Command y Start Command manualmente y haz deploy desde la UI.
 
+SQLite on Render (Sprint-0 quick workaround)
+-------------------------------------------
+If you want to keep SQLite for now (note: Render's filesystem is ephemeral), do the following to avoid the "unable to open database file" error during build:
+
+1) Build Command (Render service settings)
+
+   ```bash
+   pip install -r requirements.txt && touch db.sqlite3 && chmod 666 db.sqlite3 && python manage.py collectstatic --noinput && python manage.py migrate --noinput
+   ```
+
+   This ensures a `db.sqlite3` file exists and is writable during the build/migrate step.
+
+2) Start Command (Render service settings)
+
+   Option A — use helper script (recommended):
+
+   ```bash
+   bash scripts/render_start.sh
+   ```
+
+   Option B — direct gunicorn (if you don't need the script):
+
+   ```bash
+   gunicorn -b 0.0.0.0:$PORT config.wsgi:application --workers 3
+   ```
+
+- Notes:
+- The helper script `scripts/render_start.sh` is intentionally lightweight: it only ensures the SQLite file exists and then starts Gunicorn. It does NOT run `migrate` or `collectstatic`.
+- For fastest startup on Render (free tier) run `migrate` and `collectstatic` during the Build step (recommended). Running them at Start makes the web process wait for those tasks and slows the first response.
+- Remember: SQLite on Render is not persistent — data will be lost on redeploy. Switch to Postgres for production.
+
 Notas sobre estáticos
 
 - Usamos `static/` para los archivos de origen y `STATIC_ROOT` (por defecto `staticfiles/`) para el artefacto producido por `collectstatic` en deploy. Mantenerlas separadas evita mezclar fuentes y artefactos.

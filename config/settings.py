@@ -97,9 +97,21 @@ def parse_database_url(url: str):
     parsed = urlparse(url)
     scheme = parsed.scheme
     if scheme.startswith('sqlite'):
+        # Support both relative and absolute sqlite URLs.
+        # - Common dev URL: sqlite:///db.sqlite3  -> relative to BASE_DIR
+        # - Absolute URL (if user supplies): sqlite:////tmp/db.sqlite3 -> absolute path
+        # urlparse strips leading slashes in .path; preserve absolute paths when provided
+        raw_path = parsed.path or ''
+        # If the original URL contained four slashes (sqlite:////...), treat as absolute
+        if url.startswith('sqlite:////'):
+            # parsed.path will be like '/tmp/db.sqlite3' -> use as absolute
+            name = Path(raw_path)
+        else:
+            # relative path: use BASE_DIR / 'db.sqlite3' (or subpath)
+            name = BASE_DIR / raw_path.lstrip('/')
         return {
             'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / parsed.path.lstrip('/'),
+            'NAME': str(name),
         }
     if scheme.startswith('postgres') or scheme.startswith('postgresql'):
         return {
