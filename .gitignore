@@ -69,8 +69,9 @@ staticfiles/
 static/CACHE/*
 
 # Environment variables
+# Ignore actual environment files with secrets, but keep an example template tracked
 .env
-.env.*
+!.env.example
 
 # Celery
 celerybeat-schedule

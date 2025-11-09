@@ -122,6 +122,13 @@ If you want to keep SQLite for now (note: Render's filesystem is ephemeral), do 
 - For fastest startup on Render (free tier) run `migrate` and `collectstatic` during the Build step (recommended). Running them at Start makes the web process wait for those tasks and slows the first response.
 - Remember: SQLite on Render is not persistent — data will be lost on redeploy. Switch to Postgres for production.
 
+Demo desplegado
+---------------
+
+La aplicación está desplegada en: https://estudify.onrender.com/
+
+Comparte este enlace con el equipo para acceso rápido a la instancia de Sprint 0 (nota: usando SQLite en Render los datos no persisten entre redeploys).
+
 Notas sobre estáticos
 
 - Usamos `static/` para los archivos de origen y `STATIC_ROOT` (por defecto `staticfiles/`) para el artefacto producido por `collectstatic` en deploy. Mantenerlas separadas evita mezclar fuentes y artefactos.
