@@ -1,5 +1,7 @@
 # Estudify
 
+[![codecov](https://codecov.io/gh/Nicolas-12000/Estudify-Django/branch/main/graph/badge.svg)](https://codecov.io/gh/Nicolas-12000/Estudify-Django)
+
 > Plataforma de gestión académica — Sprint 0: configuración inicial
 
 Este repositorio contiene la base del proyecto Django `Estudify`. El objetivo del Sprint 0 es dejar el proyecto ejecutable localmente, con pruebas básicas, documentación inicial y CI que ejecute los tests.
