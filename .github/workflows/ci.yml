@@ -20,6 +20,23 @@ jobs:
       - name: Run migrations
         run: |
           python manage.py migrate --noinput
+      - name: Debug list repo and pytest collection
+        run: |
+          echo "--- python version ---"
+          python -V
+          echo "--- repo listing ---"
+          ls -la
+          echo "--- recursive listing (top) ---"
+          ls -R | sed -n '1,200p'
+          echo "--- pytest collect-only ---"
+          python -m pytest --collect-only -q 2>&1 | tee pytest-collect.txt || true
+        continue-on-error: true
+      - name: Upload pytest collection artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pytest-collection
+          path: pytest-collect.txt
       - name: Run tests (generate coverage html + xml, include branch, junit)
         run: |
           pytest -q --cov=. --cov-branch --cov-report=html --cov-report=xml --junitxml=junit.xml -o junit_family=legacy
