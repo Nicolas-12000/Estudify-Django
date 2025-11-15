@@ -16,18 +16,42 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-
-# drf-spectacular views
-from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
+from django.conf import settings
+from django.conf.urls.static import static
+from drf_spectacular.views import (
+    SpectacularAPIView,
+    SpectacularRedocView,
+    SpectacularSwaggerView,
+)
 
 urlpatterns = [
+    # Admin
     path('admin/', admin.site.urls),
-    # Home page (core)
-    path('', include('apps.core.urls')),
 
-    # OpenAPI schema and Swagger UI
+    # API Documentation (Swagger/OpenAPI)
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
     path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
+    path('api/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
 
-    # include other app urls as needed, e.g. path('api/', include('apps.api.urls'))
+    # API REST
+    path('api/', include('apps.api.urls')),
+
+    # Apps
+    path('accounts/', include('apps.users.urls')),
+    path('courses/', include('apps.courses.urls')),
+    path('academics/', include('apps.academics.urls')),
+    path('reports/', include('apps.reports.urls')),
+
+    # Home
+    path('', include('apps.core.urls')),
 ]
+
+# Servir archivos media y static en desarrollo
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+
+# Personalizar títulos del admin
+admin.site.site_header = 'Estudify - Administración'
+admin.site.site_title = 'Estudify Admin'
+admin.site.index_title = 'Panel de Administración'
