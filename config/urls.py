@@ -27,6 +27,9 @@ from drf_spectacular.views import (
 urlpatterns = [
     # Admin
     path('admin/', admin.site.urls),
+    
+    # Panel de Administración (custom)
+    path('panel/', include('apps.core.urls_admin')),
 
     # API Documentation (Swagger/OpenAPI)
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),

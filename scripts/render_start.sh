@@ -33,5 +33,15 @@ fi
 chmod 666 "$DB_PATH" || true
 
 echo "[render_start] starting gunicorn (lightweight start, migrations/collectstatic should run during Build)"
+# Run migrations at start (safer to run when runtime DB is available)
+echo "[render_start] running migrations"
+python manage.py migrate --no-input || true
+
+# Optionally seed initial data if SEED_INITIAL_DATA env var is set to 1/true
+if [ "${SEED_INITIAL_DATA:-}" = "1" ] || [ "${SEED_INITIAL_DATA:-}" = "true" ]; then
+  echo "[render_start] seeding initial data"
+  python manage.py seed_initial_data || true
+fi
+
 # Use PORT provided by Render
 exec gunicorn -b 0.0.0.0:${PORT:-10000} config.wsgi:application --workers 3

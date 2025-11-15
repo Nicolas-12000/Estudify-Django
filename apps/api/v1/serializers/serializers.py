@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from decimal import Decimal
 from django.contrib.auth import get_user_model
 from apps.users.models import Profile
 from apps.courses.models import Course, Subject, CourseEnrollment
@@ -80,9 +81,9 @@ class CourseEnrollmentSerializer(serializers.ModelSerializer):
         model = CourseEnrollment
         fields = [
             'id', 'student', 'student_name', 'course', 'course_name',
-            'enrollment_date', 'is_active'
+            'created_at', 'is_active'
         ]
-        read_only_fields = ['id', 'enrollment_date']
+        read_only_fields = ['id', 'created_at']
     
     def validate(self, data):
         """
@@ -119,6 +120,19 @@ class GradeSerializer(serializers.ModelSerializer):
     graded_by_name = serializers.CharField(source='graded_by.get_full_name', read_only=True)
     is_passing = serializers.BooleanField(read_only=True)
     letter_grade = serializers.CharField(read_only=True)
+    # Explicitly declare Decimal fields to avoid float-based validators warnings
+    value = serializers.DecimalField(
+        max_digits=3,
+        decimal_places=1,
+        min_value=Decimal('0.0'),
+        max_value=Decimal('5.0')
+    )
+    weight = serializers.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        min_value=Decimal('0.0'),
+        max_value=Decimal('100.0')
+    )
     
     class Meta:
         model = Grade

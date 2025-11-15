@@ -3,6 +3,7 @@ from django.utils.translation import gettext_lazy as _
 
 from apps.core.models import AbstractBaseModel
 from apps.users.models import User
+from apps.core.validators import validate_code_field, validate_text_field, validate_alphanumeric_with_spaces
 
 
 class Course(AbstractBaseModel):
@@ -38,6 +39,16 @@ class Course(AbstractBaseModel):
 		if not self.max_students:
 			return False
 		return self.enrolled_count >= self.max_students
+	
+	def clean(self):
+		"""Validación personalizada de campos."""
+		super().clean()
+		if self.name:
+			validate_alphanumeric_with_spaces(self.name)
+		if self.code:
+			validate_code_field(self.code)
+		if self.description:
+			validate_text_field(self.description)
 
 
 class Subject(AbstractBaseModel):
@@ -60,6 +71,16 @@ class Subject(AbstractBaseModel):
 
 	def __str__(self):
 		return f"{self.name} - {self.course.name}"
+	
+	def clean(self):
+		"""Validación personalizada de campos."""
+		super().clean()
+		if self.name:
+			validate_alphanumeric_with_spaces(self.name)
+		if self.code:
+			validate_code_field(self.code)
+		if self.description:
+			validate_text_field(self.description)
 
 
 class CourseEnrollment(AbstractBaseModel):

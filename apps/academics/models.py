@@ -2,10 +2,12 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.core.exceptions import ValidationError
+from decimal import Decimal
 
 from apps.core.models import AbstractBaseModel
 from apps.users.models import User
 from apps.courses.models import Subject, Course
+from apps.core.validators import validate_text_field
 
 
 class Grade(AbstractBaseModel):
@@ -33,8 +35,8 @@ class Grade(AbstractBaseModel):
 		max_digits=3,
 		decimal_places=1,
 		validators=[
-			MinValueValidator(0.0),
-			MaxValueValidator(5.0)
+			MinValueValidator(Decimal('0.0')),
+			MaxValueValidator(Decimal('5.0'))
 		],
 		help_text=_('Valor de la calificación (0.0 - 5.0)')
 	)
@@ -56,10 +58,10 @@ class Grade(AbstractBaseModel):
 		_('Peso'),
 		max_digits=5,
 		decimal_places=2,
-		default=100.00,
+		default=Decimal('100.00'),
 		validators=[
-			MinValueValidator(0.0),
-			MaxValueValidator(100.0)
+			MinValueValidator(Decimal('0.0')),
+			MaxValueValidator(Decimal('100.0'))
 		],
 		help_text=_('Peso porcentual de la calificación')
 	)
@@ -97,6 +99,9 @@ class Grade(AbstractBaseModel):
 
 	def clean(self):
 		"""Validación personalizada para verificar que el estudiante esté inscrito en el curso."""
+		super().clean()
+		if self.comments:
+			validate_text_field(self.comments)
 		if self.student and self.subject:
 			from apps.courses.models import CourseEnrollment
 			if not CourseEnrollment.objects.filter(
@@ -111,7 +116,7 @@ class Grade(AbstractBaseModel):
 	@property
 	def is_passing(self):
 		"""Verifica si la calificación es aprobatoria (>= 3.0)."""
-		return self.value >= 3.0
+		return self.value >= Decimal('3.0')
 
 	@property
 	def letter_grade(self):
@@ -198,6 +203,9 @@ class Attendance(AbstractBaseModel):
 
 	def clean(self):
 		"""Validación para verificar que el estudiante esté inscrito en el curso."""
+		super().clean()
+		if self.notes:
+			validate_text_field(self.notes)
 		if self.student and self.course:
 			from apps.courses.models import CourseEnrollment
 			if not CourseEnrollment.objects.filter(

@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block title %}400 - Solicitud Incorrecta{% endblock %}
+
+{% block content %}
+<div class="error-page">
+    <div class="container">
+        <h1>400</h1>
+        <h2>Solicitud Incorrecta</h2>
+        <p>Lo sentimos, la solicitud que enviaste no pudo ser procesada.</p>
+        <p>Por favor, verifica los datos e intenta nuevamente.</p>
+        
+        <div class="mt-4">
+            <a href="{% url 'home' %}" class="btn btn-primary btn-lg">
+                <i class="fas fa-home"></i> Volver al Inicio
+            </a>
+            <a href="javascript:history.back()" class="btn btn-outline-light btn-lg ms-2">
+                <i class="fas fa-arrow-left"></i> Regresar
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

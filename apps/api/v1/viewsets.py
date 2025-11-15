@@ -1,4 +1,5 @@
 from rest_framework import viewsets, status, filters
+import logging
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
@@ -12,6 +13,11 @@ from apps.api.serializers import (
     AttendanceSerializer, GradeStatisticsSerializer,
     AttendanceStatisticsSerializer
 )
+from apps.api.permissions import (
+    IsAdminUser, IsTeacherOrAdmin, GradePermission, 
+    AttendancePermission, CourseEnrollmentPermission,
+    CoursePermission, SubjectPermission
+)
 from apps.users.models import Profile
 from apps.courses.models import Course, Subject, CourseEnrollment
 from apps.academics.models import Grade, Attendance
@@ -23,17 +29,18 @@ class UserViewSet(viewsets.ModelViewSet):
     """
     ViewSet para gestión de usuarios.
     CRUD completo + acciones personalizadas.
+    Solo admins pueden crear/editar/eliminar usuarios.
     """
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAdminUser]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['role', 'is_active']
     search_fields = ['username', 'email', 'first_name', 'last_name']
     ordering_fields = ['date_joined', 'last_name']
     ordering = ['-date_joined']
     
-    @action(detail=False, methods=['get'])
+    @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])
     def me(self, request):
         """Obtener información del usuario actual."""
         serializer = self.get_serializer(request.user)
@@ -52,15 +59,36 @@ class UserViewSet(viewsets.ModelViewSet):
 
 
 class CourseViewSet(viewsets.ModelViewSet):
-    """ViewSet para gestión de cursos."""
+    """
+    ViewSet para gestión de cursos.
+    - Admins: acceso completo
+    - Profesores: ver todos, editar solo los suyos
+    - Estudiantes: solo ver cursos inscritos
+    """
     queryset = Course.objects.all()
     serializer_class = CourseSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [CoursePermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['academic_year', 'semester', 'teacher', 'is_active']
     search_fields = ['name', 'code']
     ordering_fields = ['name', 'academic_year', 'created_at']
     ordering = ['-academic_year', 'semester', 'name']
+    
+    def get_queryset(self):
+        """Filtrar cursos según el rol del usuario."""
+        queryset = super().get_queryset()
+        user = self.request.user
+        
+        # Estudiantes solo ven cursos donde están inscritos
+        if user.is_student:
+            enrolled_course_ids = CourseEnrollment.objects.filter(
+                student=user,
+                is_active=True
+            ).values_list('course_id', flat=True)
+            return queryset.filter(id__in=enrolled_course_ids)
+        
+        # Profesores y admins ven todos
+        return queryset
     
     @action(detail=True, methods=['get'])
     def students(self, request, pk=None):
@@ -83,26 +111,68 @@ class CourseViewSet(viewsets.ModelViewSet):
 
 
 class SubjectViewSet(viewsets.ModelViewSet):
-    """ViewSet para gestión de materias."""
+    """
+    ViewSet para gestión de materias.
+    - Admins: acceso completo
+    - Profesores: ver todas, editar solo las suyas
+    - Estudiantes: solo ver materias de cursos inscritos
+    """
     queryset = Subject.objects.all()
     serializer_class = SubjectSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [SubjectPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['course', 'teacher', 'is_active']
     search_fields = ['name', 'code']
     ordering_fields = ['name', 'credits', 'created_at']
     ordering = ['course', 'name']
+    
+    def get_queryset(self):
+        """Filtrar materias según el rol del usuario."""
+        queryset = super().get_queryset()
+        user = self.request.user
+        
+        # Estudiantes solo ven materias de cursos inscritos
+        if user.is_student:
+            enrolled_course_ids = CourseEnrollment.objects.filter(
+                student=user,
+                is_active=True
+            ).values_list('course_id', flat=True)
+            return queryset.filter(course_id__in=enrolled_course_ids)
+        
+        # Profesores y admins ven todas
+        return queryset
 
 
 class CourseEnrollmentViewSet(viewsets.ModelViewSet):
-    """ViewSet para gestión de inscripciones."""
+    """
+    ViewSet para gestión de inscripciones.
+    - Admins: acceso completo
+    - Profesores: ver inscripciones de sus cursos
+    - Estudiantes: solo ver sus propias inscripciones
+    """
     queryset = CourseEnrollment.objects.all()
     serializer_class = CourseEnrollmentSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [CourseEnrollmentPermission]
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
     filterset_fields = ['student', 'course', 'is_active']
     ordering_fields = ['enrollment_date']
     ordering = ['-enrollment_date']
+    
+    def get_queryset(self):
+        """Filtrar inscripciones según el rol del usuario."""
+        queryset = super().get_queryset()
+        user = self.request.user
+        
+        # Estudiantes solo ven sus propias inscripciones
+        if user.is_student:
+            return queryset.filter(student=user)
+        
+        # Profesores ven inscripciones de sus cursos
+        if user.is_teacher and not user.is_staff and not user.is_admin_role:
+            return queryset.filter(course__teacher=user)
+        
+        # Admins ven todas
+        return queryset
     
     @action(detail=False, methods=['post'])
     def bulk_enroll(self, request):
@@ -111,7 +181,25 @@ class CourseEnrollmentViewSet(viewsets.ModelViewSet):
         Espera: {"course_id": 1, "student_ids": [1, 2, 3]}
         """
         course_id = request.data.get('course_id')
+        # Support multiple encodings: JSON list, form list, or comma-separated string
         student_ids = request.data.get('student_ids', [])
+        if hasattr(request.data, 'getlist'):
+            form_list = request.data.getlist('student_ids')
+            if form_list:
+                student_ids = form_list
+        # Normalize student_ids: accept list, comma-separated string, or single value
+        if isinstance(student_ids, str):
+            student_ids = [s.strip() for s in student_ids.split(',') if s.strip()]
+        if isinstance(student_ids, (int, str)):
+            student_ids = [student_ids]
+        # Convert IDs to ints where possible
+        normalized_ids = []
+        for sid in student_ids:
+            try:
+                normalized_ids.append(int(sid))
+            except (TypeError, ValueError):
+                continue
+        student_ids = normalized_ids
         
         if not course_id or not student_ids:
             return Response(
@@ -127,28 +215,34 @@ class CourseEnrollmentViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_404_NOT_FOUND
             )
         
+        logger = logging.getLogger(__name__)
         enrolled = []
         errors = []
         
         for student_id in student_ids:
+            logger.warning(f"bulk_enroll: processing student_id={student_id}")
             try:
                 student = User.objects.get(id=student_id, role=User.UserRole.STUDENT)
-                enrollment, created = CourseEnrollment.objects.get_or_create(
-                    student=student,
-                    course=course,
-                    defaults={'is_active': True}
-                )
-                if created:
-                    enrolled.append(student_id)
-                else:
-                    errors.append({
-                        'student_id': student_id,
-                        'error': 'Ya inscrito'
-                    })
             except User.DoesNotExist:
+                logger.warning(f"bulk_enroll: student not found or not a STUDENT: {student_id}")
                 errors.append({
                     'student_id': student_id,
                     'error': 'Estudiante no encontrado'
+                })
+                continue
+
+            enrollment, created = CourseEnrollment.objects.get_or_create(
+                student=student,
+                course=course,
+                defaults={'is_active': True}
+            )
+            if created:
+                enrolled.append(student_id)
+            else:
+                logger.warning(f"bulk_enroll: already enrolled student_id={student_id}")
+                errors.append({
+                    'student_id': student_id,
+                    'error': 'Ya inscrito'
                 })
         
         return Response({
@@ -159,15 +253,35 @@ class CourseEnrollmentViewSet(viewsets.ModelViewSet):
 
 
 class GradeViewSet(viewsets.ModelViewSet):
-    """ViewSet para gestión de calificaciones."""
+    """
+    ViewSet para gestión de calificaciones.
+    - Admins y profesores: pueden crear/editar/eliminar
+    - Estudiantes: solo pueden VER sus propias calificaciones
+    """
     queryset = Grade.objects.all()
     serializer_class = GradeSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [GradePermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['student', 'subject', 'grade_type', 'graded_by']
     search_fields = ['student__first_name', 'student__last_name', 'subject__name']
     ordering_fields = ['graded_date', 'value']
     ordering = ['-graded_date']
+    
+    def get_queryset(self):
+        """Filtrar calificaciones según el rol del usuario."""
+        queryset = super().get_queryset()
+        user = self.request.user
+        
+        # Estudiantes solo ven sus propias calificaciones
+        if user.is_student:
+            return queryset.filter(student=user)
+        
+        # Profesores ven calificaciones de sus materias
+        if user.is_teacher and not user.is_staff and not user.is_admin_role:
+            return queryset.filter(subject__teacher=user)
+        
+        # Admins ven todas
+        return queryset
     
     def perform_create(self, serializer):
         """Asignar automáticamente el docente que califica."""
@@ -213,14 +327,34 @@ class GradeViewSet(viewsets.ModelViewSet):
 
 
 class AttendanceViewSet(viewsets.ModelViewSet):
-    """ViewSet para gestión de asistencia."""
+    """
+    ViewSet para gestión de asistencia.
+    - Admins y profesores: pueden crear/editar/eliminar
+    - Estudiantes: solo pueden VER su propia asistencia
+    """
     queryset = Attendance.objects.all()
     serializer_class = AttendanceSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AttendancePermission]
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
     filterset_fields = ['student', 'course', 'status', 'date']
     ordering_fields = ['date']
     ordering = ['-date']
+    
+    def get_queryset(self):
+        """Filtrar asistencia según el rol del usuario."""
+        queryset = super().get_queryset()
+        user = self.request.user
+        
+        # Estudiantes solo ven su propia asistencia
+        if user.is_student:
+            return queryset.filter(student=user)
+        
+        # Profesores ven asistencia de sus cursos
+        if user.is_teacher and not user.is_staff and not user.is_admin_role:
+            return queryset.filter(course__teacher=user)
+        
+        # Admins ven todas
+        return queryset
     
     def perform_create(self, serializer):
         """Asignar automáticamente el docente que registra."""

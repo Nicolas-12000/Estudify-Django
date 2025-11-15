@@ -91,6 +91,18 @@ class UserLoginForm(AuthenticationForm):
         })
     )
 
+    def clean_username(self):
+        """Permitir iniciar sesión usando email: si el campo contiene '@', buscar el usuario por email y devolver su username."""
+        username = self.cleaned_data.get('username')
+        if username and '@' in username:
+            try:
+                user = User.objects.get(email__iexact=username)
+                return user.username
+            except User.DoesNotExist:
+                # Dejar que la validación normal maneje el error (credenciales inválidas)
+                return username
+        return username
+
 
 class UserProfileForm(forms.ModelForm):
     """

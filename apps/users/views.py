@@ -17,7 +17,7 @@ def register_view(request):
     Vista para registro de nuevos usuarios.
     """
     if request.user.is_authenticated:
-        return redirect('dashboard')
+        return redirect('home')
     
     if request.method == 'POST':
         form = UserRegistrationForm(request.POST)
@@ -26,7 +26,7 @@ def register_view(request):
             # Crear perfil automáticamente
             Profile.objects.create(user=user)
             messages.success(request, 'Registro exitoso. Ya puedes iniciar sesión.')
-            return redirect('login')
+            return redirect('users:login')
     else:
         form = UserRegistrationForm()
     
@@ -36,20 +36,35 @@ def register_view(request):
 def login_view(request):
     """
     Vista para inicio de sesión.
+    Credenciales de prueba: admin@estudify.com / Admin123!@#
     """
     if request.user.is_authenticated:
-        return redirect('dashboard')
+        # Redirigir según rol
+        if request.user.is_admin_role or request.user.is_staff:
+            return redirect('admin_panel:dashboard')
+        return redirect('home')
     
     if request.method == 'POST':
         form = UserLoginForm(request, data=request.POST)
         if form.is_valid():
             username = form.cleaned_data.get('username')
             password = form.cleaned_data.get('password')
+            # Allow login by username OR email
             user = authenticate(username=username, password=password)
+            if user is None and username and '@' in username:
+                # try to resolve email -> username
+                try:
+                    user_obj = User.objects.get(email__iexact=username)
+                    user = authenticate(username=user_obj.username, password=password)
+                except User.DoesNotExist:
+                    user = None
             if user is not None:
                 login(request, user)
                 messages.success(request, f'Bienvenido, {user.get_full_name()}!')
-                next_url = request.GET.get('next', 'dashboard')
+                # Redirigir según rol
+                if user.is_admin_role or user.is_staff:
+                    return redirect('admin_panel:dashboard')
+                next_url = request.GET.get('next', 'home')
                 return redirect(next_url)
     else:
         form = UserLoginForm()
@@ -64,7 +79,7 @@ def logout_view(request):
     """
     logout(request)
     messages.info(request, 'Has cerrado sesión correctamente.')
-    return redirect('login')
+    return redirect('users:login')
 
 
 @login_required
@@ -79,7 +94,7 @@ def profile_view(request):
         if form.is_valid():
             form.save()
             messages.success(request, 'Perfil actualizado correctamente.')
-            return redirect('profile')
+            return redirect('users:profile')
     else:
         form = UserProfileForm(instance=profile)
     
@@ -96,7 +111,7 @@ def user_list_view(request):
     """
     if not request.user.is_admin_role and not request.user.is_staff:
         messages.error(request, 'No tienes permisos para acceder a esta página.')
-        return redirect('dashboard')
+        return redirect('home')
     
     users = User.objects.all().order_by('-date_joined')
     
@@ -131,7 +146,7 @@ def user_detail_view(request, pk):
     # Solo admin o el mismo usuario pueden ver el perfil
     if not (request.user.is_admin_role or request.user.is_staff or request.user == user):
         messages.error(request, 'No tienes permisos para ver este perfil.')
-        return redirect('dashboard')
+        return redirect('home')
     
     return render(request, 'users/user_detail.html', {'user_obj': user})
 
@@ -144,7 +159,7 @@ def toggle_user_status(request, pk):
     """
     if not (request.user.is_admin_role or request.user.is_staff):
         messages.error(request, 'No tienes permisos para esta acción.')
-        return redirect('dashboard')
+        return redirect('home')
     
     user = get_object_or_404(User, pk=pk)
     
@@ -156,4 +171,4 @@ def toggle_user_status(request, pk):
         messages.success(request, f'Usuario {user.username} activado.')
     
     user.save()
-    return redirect('user_list')
+    return redirect('users:user_list')

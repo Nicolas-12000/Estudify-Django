@@ -2,6 +2,12 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser, Group, Permission
 from django.utils.translation import gettext_lazy as _
 from apps.core.models import AbstractBaseModel
+from apps.core.validators import (
+    validate_name_field,
+    validate_username_field,
+    validate_text_field,
+    validate_alphanumeric_with_spaces,
+)
 
 class User(AbstractUser):
 	"""
@@ -27,6 +33,16 @@ class User(AbstractUser):
 		null=True,
 		help_text=_('Número de teléfono de contacto')
 	)
+	
+	def clean(self):
+		"""Validación personalizada de campos."""
+		super().clean()
+		if self.first_name:
+			validate_name_field(self.first_name)
+		if self.last_name:
+			validate_name_field(self.last_name)
+		if self.username:
+			validate_username_field(self.username)
 	avatar = models.ImageField(
 		_('Avatar'),
 		upload_to='avatars/',
@@ -124,6 +140,18 @@ class Profile(AbstractBaseModel):
 		default='Colombia',
 		help_text=_('País de residencia')
 	)
+	
+	def clean(self):
+		"""Validación personalizada de campos."""
+		super().clean()
+		if self.bio:
+			validate_text_field(self.bio)
+		if self.address:
+			validate_alphanumeric_with_spaces(self.address)
+		if self.city:
+			validate_alphanumeric_with_spaces(self.city)
+		if self.country:
+			validate_alphanumeric_with_spaces(self.country)
 
 	class Meta:
 		verbose_name = _('Perfil')

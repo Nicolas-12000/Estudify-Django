@@ -1,10 +1,10 @@
 # Estudify
 
-[![codecov](https://codecov.io/gh/Nicolas-12000/Estudify-Django/branch/main/graph/badge.svg)](https://codecov.io/gh/Nicolas-12000/Estudify-Django)
+![codecov](https://codecov.io/gh/Nicolas-12000/Estudify-Django/branch/main/graph/badge.svg)
 
-> Plataforma de gestión académica — Sprint 0: configuración inicial
+> Plataforma de gestión académica
 
-Este repositorio contiene la base del proyecto Django `Estudify`. El objetivo del Sprint 0 es dejar el proyecto ejecutable localmente, con pruebas básicas, documentación inicial y CI que ejecute los tests.
+Este repositorio contiene el código fuente de `Estudify`, una plataforma de gestión académica desarrollada con Django. El proyecto sigue buenas prácticas de ingeniería: principios de diseño (SOLID, KISS), desarrollo guiado por pruebas (TDD), convenciones de estilo PEP8, y la arquitectura MVT. Aquí encontrarás la implementación, tests automatizados, documentación y la configuración de CI para ejecutar y reportar pruebas.
 
 ---
 
@@ -49,97 +49,351 @@ python manage.py createsuperuser
 6. Ejecuta el servidor:
 
 ```powershell
+# 🎓 ESTUDIFY - Sistema de Gestión Académica
+
+![Python](https://img.shields.io/badge/Python-3.12-blue)
+![Django](https://img.shields.io/badge/Django-5.2-green)
+![DRF](https://img.shields.io/badge/DRF-3.15-red)
+![License](https://img.shields.io/badge/License-MIT-yellow)
+
+Sistema completo de gestión académica desarrollado con Django. El proyecto está en fase avanzada de desarrollo: la mayor parte de las funcionalidades core están implementadas y la suite de tests está en ejecución.
+
+## 📋 Características Principales
+
+### Funcionalidades Core
+- **Autenticación y Autorización**: Sistema de roles (Admin, Docente, Estudiante)
+- **Gestión de Cursos**: CRUD de cursos y materias
+- **Calificaciones**: Registro y consulta de notas con varios tipos de evaluación
+- **Asistencia**: Control de asistencia con estados (Presente, Ausente, Tarde, Excusado)
+- **Dashboard**: Estadísticas y métricas
+- **Reportes**: Generación de boletines y reportes en PDF/Excel
+- **Notificaciones**: Tareas asíncronas con Celery (pendiente: plantillas y señales)
+- **API REST**: API documentada con Swagger/OpenAPI
+
+### Características Técnicas
+- **Testing**: Tests con `pytest` y `pytest-django`; se generan reportes de cobertura con `coverage.py` (consulta `coverage.xml`).
+- **CI/CD**: GitHub Actions ejecuta tests, genera artefactos (junit/coverage) y realiza verificaciones automáticas.
+- **Gráficos**: Visualizaciones con Chart.js
+- **UI/UX**: Diseño responsive con Bootstrap 5
+- **Seguridad**: Validaciones en modelos y permisos en la API
+
+## 🏗️ Arquitectura
+
+```
+ESTUDIFY/
+├── apps/
+│   ├── core/           # Modelos base y utilidades comunes
+│   ├── users/          # Autenticación y perfiles
+│   ├── courses/        # Gestión de cursos y materias
+│   ├── academics/      # Calificaciones y asistencia
+│   ├── reports/        # Dashboard y reportes
+│   ├── notifications/  # Sistema de notificaciones
+│   └── api/            # API REST con DRF
+├── config/             # Configuración Django y Celery
+├── templates/          # Plantillas HTML
+├── static/             # Archivos estáticos (CSS, JS, imágenes)
+├── tests/              # Tests unitarios e integración
+├── docs/               # Documentación adicional
+├── media/              # Archivos subidos por usuarios
+└── utils/              # Funciones de utilidad
+```
+
+## 🚀 Instalación y Configuración
+
+### Requisitos Previos
+- Python 3.11+
+- Redis (para Celery)
+- Git
+
+### 1. Clonar el Repositorio
+```bash
+git clone https://github.com/tu-usuario/estudify.git
+cd estudify
+```
+
+### 2. Crear Entorno Virtual
+```bash
+python -m venv .venv
+
+# Windows
+.venv\Scripts\activate
+
+# Linux/Mac
+source .venv/bin/activate
+```
+
+### 3. Instalar Dependencias
+```bash
+pip install -r requirements.txt
+```
+
+### 4. Configurar Variables de Entorno
+```bash
+cp .env.example .env
+# Editar .env con tu configuración
+```
+
+**Variables importantes:**
+```env
+SECRET_KEY=tu-secret-key-aqui
+DEBUG=True
+ALLOWED_HOSTS=localhost,127.0.0.1
+
+# Email (opcional, para notificaciones)
+EMAIL_HOST_USER=tu-email@gmail.com
+EMAIL_HOST_PASSWORD=tu-app-password
+
+# Celery (Redis)
+CELERY_BROKER_URL=redis://localhost:6379/0
+```
+
+### 5. Ejecutar Migraciones
+```bash
+python manage.py makemigrations
+python manage.py migrate
+```
+
+### 6. Crear Superusuario
+```bash
+python manage.py createsuperuser
+```
+
+### 7. Cargar Datos de Prueba (Opcional)
+```bash
+python manage.py loaddata fixtures/initial_data.json
+```
+
+### 8. Ejecutar el Servidor
+```bash
 python manage.py runserver
-# Visita http://127.0.0.1:8000/
 ```
 
-Tests
+Accede a: http://localhost:8000
 
-Ejecuta:
-
-```powershell
-pytest -q
+### 9. Ejecutar Celery Worker (Terminal separada)
+```bash
+# Asegúrate de tener Redis corriendo
+celery -A config worker -l info
 ```
 
-Documentación API (Swagger)
+## 🧪 Testing
 
-Con el servidor en marcha, visita:
+### Ejecutar Todos los Tests
+```bash
+pytest
+```
 
-- /api/schema/  -> OpenAPI JSON
-- /api/schema/swagger-ui/  -> Swagger UI
+### Tests con Cobertura
+```bash
+pytest --cov=apps --cov-report=html
+```
 
-CI
+## 📊 Modelos de Datos
 
-Se incluye un workflow de GitHub Actions (`.github/workflows/ci.yml`) que ejecuta los tests en pushes y PRs a `main`.
+### User (Usuario)
+```python
+- username: CharField (único)
+- email: EmailField
+- role: CharField (ADMIN, TEACHER, STUDENT)
+- first_name, last_name: CharField
+- phone: CharField
+- avatar: ImageField
+- date_of_birth: DateField
+```
 
-Despliegue (Render)
+### Course (Curso)
+```python
+- name: CharField
+- code: CharField (único por periodo)
+- academic_year: IntegerField
+- semester: IntegerField
+- teacher: ForeignKey(User)
+- max_students: PositiveIntegerField
+```
 
-Para deploy en Render u otro PaaS, considera:
-- Ejecutar `python manage.py collectstatic --noinput` durante el build
-- Asegurar variables de entorno (SECRET_KEY, EMAIL_*, CELERY_BROKER_URL, etc.) en el entorno del servicio
+### Subject (Materia)
+```python
+- name: CharField
+- code: CharField (único)
+- credits: PositiveIntegerField
+- course: ForeignKey(Course)
+- teacher: ForeignKey(User)
+```
 
-Nota sobre despliegue automático (CI -> Render)
+### Grade (Calificación)
+```python
+- student: ForeignKey(User)
+- subject: ForeignKey(Subject)
+- value: DecimalField (0.0 - 5.0)
+- grade_type: CharField (QUIZ, EXAM, etc.)
+- weight: DecimalField
+- graded_by: ForeignKey(User)
+```
 
-1. He añadido un workflow `./github/workflows/cd.yml` que se ejecuta en pushes a `main`. Para que funcione necesitas añadir en GitHub repo > Settings > Secrets las siguientes claves:
+### Attendance (Asistencia)
+```python
+- student: ForeignKey(User)
+- course: ForeignKey(Course)
+- date: DateField
+- status: CharField (PRESENT, ABSENT, LATE, EXCUSED)
+- recorded_by: ForeignKey(User)
+```
 
-- `RENDER_SERVICE_ID` — el id del servicio en Render
-- `RENDER_API_KEY` — tu API key de Render
+## 🔌 API REST
 
-2. El workflow instala dependencias, ejecuta `collectstatic` y `migrate` y luego llama a la API de Render para forzar un deploy. También incluí un `Procfile` con `web: gunicorn config.wsgi:application`.
+### Autenticación
+La API requiere autenticación. Usa SessionAuthentication o BasicAuthentication.
 
-3. Alternativa manual: en Render Dashboard configura Build Command y Start Command manualmente y haz deploy desde la UI.
+### Endpoints Principales
 
-SQLite on Render (Sprint-0 quick workaround)
--------------------------------------------
-If you want to keep SQLite for now (note: Render's filesystem is ephemeral), do the following to avoid the "unable to open database file" error during build:
+**Usuarios**
+```
+GET    /api/users/              # Listar usuarios
+POST   /api/users/              # Crear usuario
+GET    /api/users/{id}/         # Detalle
+GET    /api/users/me/           # Usuario actual
+POST   /api/users/{id}/toggle_status/  # Activar/desactivar
+```
 
-1) Build Command (Render service settings)
+**Cursos**
+```
+GET    /api/courses/            # Listar cursos
+POST   /api/courses/            # Crear curso
+GET    /api/courses/{id}/       # Detalle
+GET    /api/courses/{id}/students/  # Estudiantes inscritos
+GET    /api/courses/{id}/subjects/  # Materias del curso
+```
 
-   Usa una sola línea (sin caracteres de escape) al pegar en la UI de Render. Ejemplo seguro:
+**Calificaciones**
+```
+GET    /api/grades/             # Listar calificaciones
+POST   /api/grades/             # Crear calificación
+GET    /api/grades/statistics/  # Estadísticas
+```
 
-   ```bash
-   pip install -r requirements.txt && touch db.sqlite3 && chmod 666 db.sqlite3 && python manage.py migrate --noinput && python manage.py collectstatic --noinput
-   ```
+**Asistencia**
+```
+GET    /api/attendance/         # Listar asistencias
+POST   /api/attendance/         # Registrar asistencia
+GET    /api/attendance/statistics/  # Estadísticas
+```
 
-   Nota: evita terminar la línea con una barra invertida (\) al pegar en la caja del Build Command de Render; eso puede generar argumentos vacíos y provocar errores como "Invalid requirement: ''".
+### Documentación Interactiva
+- **Swagger UI**: http://localhost:8000/api/docs/
+- **ReDoc**: http://localhost:8000/api/redoc/
+- **OpenAPI Schema**: http://localhost:8000/api/schema/
 
-   This ensures a `db.sqlite3` file exists and is writable during the build/migrate step.
+## 📈 Dashboard y Reportes
 
-2) Start Command (Render service settings)
+### Gráficos Disponibles
+1. **Rendimiento Académico**: Promedio por materia (Bar Chart)
+2. **Asistencia Mensual**: Tendencia de asistencia (Line Chart)
+3. **Distribución de Calificaciones**: Por tipo de evaluación (Pie Chart)
 
-   Option A — use helper script (recommended):
+### Exportación de ReportES
+- **PDF**: Boletines individuales con ReportLab
+- **Excel**: Reportes consolidados con pandas/openpyxl
 
-   ```bash
-   bash scripts/render_start.sh
-   ```
+## 🔔 Sistema de Notificaciones
 
-   Option B — direct gunicorn (if you don't need the script):
+### Tareas Asíncronas con Celery
+- Notificación de nuevas calificaciones
+- Recordatorios de registro de asistencia
+- Emails de bienvenida
+- Confirmación de inscripción en cursos
 
-   ```bash
-   gunicorn -b 0.0.0.0:$PORT config.wsgi:application --workers 3
-   ```
+### Configuración de Email
+Para producción, configura SMTP en `.env`:
+```env
+EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend
+EMAIL_HOST=smtp.gmail.com
+EMAIL_PORT=587
+EMAIL_USE_TLS=True
+EMAIL_HOST_USER=tu-email@gmail.com
+EMAIL_HOST_PASSWORD=tu-app-password
+```
 
-- Notes:
-- The helper script `scripts/render_start.sh` is intentionally lightweight: it only ensures the SQLite file exists and then starts Gunicorn. It does NOT run `migrate` or `collectstatic`.
-- For fastest startup on Render (free tier) run `migrate` and `collectstatic` during the Build step (recommended). Running them at Start makes the web process wait for those tasks and slows the first response.
-- Remember: SQLite on Render is not persistent — data will be lost on redeploy. Switch to Postgres for production.
+## 🚢 Despliegue en Render
 
-Demo desplegado
----------------
+### 1. Preparación
+```bash
+# Crear archivo build.sh
+#!/usr/bin/env bash
+pip install -r requirements.txt
+python manage.py collectstatic --no-input
+python manage.py migrate
+```
 
-La aplicación está desplegada en: https://estudify.onrender.com/
+### 2. Configuración en Render
+- **Build Command**: `./build.sh`
+- **Start Command**: `gunicorn config.wsgi:application`
+- **Environment**: Python 3.11
 
-Comparte este enlace con el equipo para acceso rápido a la instancia de Sprint 0 (nota: usando SQLite en Render los datos no persisten entre redeploys).
+### 3. Variables de Entorno
+Configura en el dashboard de Render:
+```
+SECRET_KEY=...
+DEBUG=False
+ALLOWED_HOSTS=tu-app.onrender.com
+DATABASE_URL=postgresql://...
+CELERY_BROKER_URL=redis://...
+```
 
-Notas sobre estáticos
+### 4. Workers Adicionales
+Para Celery, crea un servicio adicional:
+- **Start Command**: `celery -A config worker -l info`
 
-- Usamos `static/` para los archivos de origen y `STATIC_ROOT` (por defecto `staticfiles/`) para el artefacto producido por `collectstatic` en deploy. Mantenerlas separadas evita mezclar fuentes y artefactos.
+## 🛠️ Desarrollo
 
-Qué falta / recomendaciones
-- Revisar y consolidar `config/settings.py` para producción (secret management, allowed hosts, logging)
-- Añadir más tests y documentación de arquitectura en `docs/`
-- Verificar Redis local si planeas usar Celery (por defecto `redis://localhost:6379/0`)
+### Estructura de Commits
+```
+feat: Nueva funcionalidad
+fix: Corrección de bug
+docs: Cambios en documentación
+test: Agregar o modificar tests
+refactor: Refactorización de código
+style: Cambios de formato
+```
 
-Si querés, puedo:
-- Añadir secciones más detalladas al README (deploy en Render, variables necesarias, comandos de mantenimiento)
-- Crear el workflow CD para publicar en Render
+### Branching Strategy
+- `main`: Producción
+- `develop`: Desarrollo
+- `feature/*`: Nuevas funcionalidades
+- `fix/*`: Correcciones
+
+### Pre-commit Hooks (Recomendado)
+```bash
+pip install pre-commit
+pre-commit install
+```
+
+## 🤝 Contribuir
+
+1. Fork el proyecto
+2. Crea una rama (`git checkout -b feature/AmazingFeature`)
+3. Commit tus cambios (`git commit -m 'feat: Add AmazingFeature'`)
+4. Push a la rama (`git push origin feature/AmazingFeature`)
+5. Abre un Pull Request
+
+
+## 👥 Autores
+
+- **Nicolás García** - *Desarrollo inicial* - [Nicolas-12000](https://github.com/Nicolas-12000)
+
+## 🙏 Agradecimientos
+
+- Django Documentation
+- DRF Documentation
+- Bootstrap Team
+- Chart.js Team
+
+## 📞 Soporte
+
+Para soporte y preguntas:
+- 📧 Email: soporte@estudify.com
+- 🐛 Issues: [GitHub Issues](https://github.com/tu-usuario/estudify/issues)
+- 📖 Docs: [Documentación](https://docs.estudify.com)
+
+---
+
+**Hecho con ❤️ y ☕ por el equipo de Estudify**
