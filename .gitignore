@@ -54,6 +54,9 @@ __pypackages__/
 .coverage.*
 coverage.xml
 htmlcov/
+junit.xml
+junit-*.xml
+pytest-collect.*
 
 # Sphinx
 docs/_build/
