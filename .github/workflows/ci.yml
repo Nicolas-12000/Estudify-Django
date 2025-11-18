@@ -201,6 +201,8 @@ jobs:
     if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     needs: lint
+    env:
+      CELERY_BROKER_URL: 'redis://localhost:6379/0'
     services:
       redis:
         image: redis:7-alpine
@@ -231,6 +233,25 @@ jobs:
           echo "DATABASE_URL=sqlite:///db.sqlite3" >> .env
           echo "CELERY_BROKER_URL=redis://localhost:6379/0" >> .env
           echo "EMAIL_BACKEND=django.core.mail.backends.console.EmailBackend" >> .env
+
+      - name: Wait for Redis to be ready
+        run: |
+          python - <<'PY'
+          import socket, time, sys
+          for i in range(30):
+              try:
+                  s = socket.socket()
+                  s.settimeout(1)
+                  s.connect(('localhost', 6379))
+                  s.close()
+                  print('Redis reachable')
+                  sys.exit(0)
+              except Exception:
+                  print('Waiting for Redis...')
+                  time.sleep(1)
+          print('Redis not reachable after timeout')
+          sys.exit(1)
+          PY
 
       - name: Run migrations
         run: python manage.py migrate --noinput
