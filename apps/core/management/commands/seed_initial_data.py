@@ -44,14 +44,18 @@ class Command(BaseCommand):
         # Teachers: create multiple teachers to make the demo feel alive
         teacher_count = int(env_or_default('SEED_TEACHER_COUNT', '7'))
         teachers = []
+        from django.contrib.auth import get_user_model
+        User = get_user_model()
+        role_val_teacher = (getattr(User, 'UserRole', None) and User.UserRole.TEACHER)
         for i in range(1, teacher_count + 1):
             username = f'teacher{i}'
             email = f'{username}@example.com'
             password = env_or_default('SEED_TEACHER_PASSWORD', 'teacherpass')
+            # Assign role explicitly to avoid writing to read-only convenience properties
             t_created, user_obj = create_user_if_missing(
                 username, email, password,
-                set_staff=True, role_attr='is_teacher', stdout=self.stdout,
-                stderr=self.stderr, style=self.style)
+                set_staff=True, role_attr='role', role_value=role_val_teacher,
+                stdout=self.stdout, stderr=self.stderr, style=self.style)
             if t_created:
                 created.append(('teacher', username))
             if user_obj:
@@ -60,14 +64,15 @@ class Command(BaseCommand):
         # Students: create multiple students for demo
         student_count = int(env_or_default('SEED_STUDENT_COUNT', '10'))
         students = []
+        role_val_student = (getattr(User, 'UserRole', None) and User.UserRole.STUDENT)
         for i in range(1, student_count + 1):
             username = f'student{i}'
             email = f'{username}@example.com'
             password = env_or_default('SEED_STUDENT_PASSWORD', 'studentpass')
             s_created, user_obj = create_user_if_missing(
                 username, email, password,
-                role_attr='is_student', stdout=self.stdout,
-                stderr=self.stderr, style=self.style)
+                role_attr='role', role_value=role_val_student,
+                stdout=self.stdout, stderr=self.stderr, style=self.style)
             if s_created:
                 created.append(('student', username))
             if user_obj:
