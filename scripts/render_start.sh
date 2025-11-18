@@ -43,6 +43,10 @@ if [ "${SEED_INITIAL_DATA:-}" = "1" ] || [ "${SEED_INITIAL_DATA:-}" = "true" ]; 
   python manage.py seed_initial_data || true
 fi
 
-# Use PORT provided by Render
-# Ensure we bind to the Render provided $PORT if present; fall back to 10000 for local/dev
-exec gunicorn config.wsgi:application --bind 0.0.0.0:${PORT:-10000} --workers 3
+  # Log PORT value for debugging (Render sets this at runtime)
+  echo "[render_start] PORT=${PORT:-<not set>}"
+
+  # Use PORT provided by Render. When running on Render the environment variable
+  # `PORT` should be set by the platform. We still support a local fallback for
+  # development but prefer the platform-provided value.
+  exec gunicorn config.wsgi:application --bind 0.0.0.0:${PORT:-10000} --workers 3
