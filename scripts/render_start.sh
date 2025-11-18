@@ -44,4 +44,5 @@ if [ "${SEED_INITIAL_DATA:-}" = "1" ] || [ "${SEED_INITIAL_DATA:-}" = "true" ]; 
 fi
 
 # Use PORT provided by Render
-exec gunicorn -b 0.0.0.0:${PORT:-10000} config.wsgi:application --workers 3
+# Ensure we bind to the Render provided $PORT if present; fall back to 10000 for local/dev
+exec gunicorn config.wsgi:application --bind 0.0.0.0:${PORT:-10000} --workers 3
