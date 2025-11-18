@@ -35,7 +35,7 @@ def test_send_welcome_email_creates_notification(db, settings):
             # force an immediate connection attempt
             _conn.ensure_connection(max_retries=0)
     except Exception:
-        pytest.skip(f"Broker {celery_app.conf.broker_url!r} not available; skipping integration test")
+        pytest.skip(f"Broker {celery_app.conf.broker_url!r} not available. Skipping integration test")
 
     # Start a test worker that shares the same Celery app and settings so
     # the worker can see the test database (we use transaction=True and
