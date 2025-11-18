@@ -94,6 +94,14 @@ DATABASES = {
     }
 }
 
+# When using the default SQLite DB for development/CI, increase the timeout
+# to reduce "database is locked" errors when multiple processes briefly
+# contend for the DB file (e.g. Celery worker + web process). For production
+# use Postgres (set `DATABASE_URL`).
+if DATABASES['default']['ENGINE'] == 'django.db.backends.sqlite3':
+    DATABASES['default'].setdefault('OPTIONS', {})
+    DATABASES['default']['OPTIONS']['timeout'] = 20
+
 DATABASE_URL = config('DATABASE_URL', default='')
 if DATABASE_URL:
     # simple parsing: allow postgres URL like
