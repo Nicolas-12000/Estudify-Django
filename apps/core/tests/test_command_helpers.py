@@ -1,7 +1,3 @@
-import os
-
-import pytest
-
 from apps.core.management.commands import command_helpers
 
 
