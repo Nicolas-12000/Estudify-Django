@@ -1,6 +1,6 @@
 # Estudify
 
-![codecov](https://codecov.io/gh/Nicolas-12000/Estudify-Django/branch/main/graph/badge.svg)
+[![codecov](https://codecov.io/gh/Nicolas-12000/Estudify-Django/branch/main/graphs/badge.svg)](https://app.codecov.io/gh/Nicolas-12000/Estudify-Django)
 
 > Plataforma de gestión académica
 
