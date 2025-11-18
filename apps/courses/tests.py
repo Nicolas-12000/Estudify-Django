@@ -1,7 +1,7 @@
 import pytest
 from django.contrib.auth import get_user_model
-from django.core.exceptions import ValidationError
-from apps.courses.models import Course, Subject, CourseEnrollment
+
+from apps.courses.models import Course, CourseEnrollment, Subject
 
 User = get_user_model()
 
@@ -79,7 +79,7 @@ class TestCourseModel:
             semester=1,
             teacher=teacher
         )
-        
+
         # Mismo código, mismo periodo -> Error
         with pytest.raises(Exception):  # IntegrityError
             Course.objects.create(
@@ -93,21 +93,21 @@ class TestCourseModel:
     def test_course_enrolled_count(self, course, student):
         """Test: Contar estudiantes inscritos."""
         assert course.enrolled_count == 0
-        
+
         CourseEnrollment.objects.create(
             student=student,
             course=course
         )
-        
+
         assert course.enrolled_count == 1
 
     def test_course_is_full(self, course):
         """Test: Verificar si el curso está lleno."""
         course.max_students = 2
         course.save()
-        
+
         assert not course.is_full
-        
+
         # Inscribir 2 estudiantes
         for i in range(2):
             student = User.objects.create_user(
@@ -119,7 +119,7 @@ class TestCourseModel:
                 student=student,
                 course=course
             )
-        
+
         assert course.is_full
 
 
@@ -160,7 +160,7 @@ class TestSubjectModel:
             course=course,
             teacher=teacher
         )
-        
+
         # Crear otra materia con el mismo código
         with pytest.raises(Exception):  # IntegrityError
             Subject.objects.create(
@@ -178,10 +178,10 @@ class TestSubjectModel:
             course=course,
             teacher=teacher
         )
-        
-        course_id = course.id
+
+        course.id
         course.delete()
-        
+
         # Verificar que la materia fue eliminada
         assert not Subject.objects.filter(id=subject.id).exists()
 
@@ -215,7 +215,7 @@ class TestCourseEnrollmentModel:
             student=student,
             course=course
         )
-        
+
         # Intentar inscribir nuevamente
         with pytest.raises(Exception):  # IntegrityError
             CourseEnrollment.objects.create(
@@ -237,7 +237,7 @@ class TestCourseEnrollmentModel:
                 student=student,
                 course=course
             )
-        
+
         assert course.enrollments.count() == 3
 
     def test_student_multiple_courses(self, student, teacher):
@@ -256,5 +256,5 @@ class TestCourseEnrollmentModel:
                 student=student,
                 course=course
             )
-        
+
         assert student.enrollments.count() == 3

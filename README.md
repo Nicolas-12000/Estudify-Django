@@ -163,6 +163,37 @@ python manage.py createsuperuser
 python manage.py loaddata fixtures/initial_data.json
 ```
 
+También existe un comando de utilidad que crea un conjunto mínimo de datos de demo (usuarios, curso de demo, materias, inscripciones, calificaciones, asistencia y una sesión con `TimeSlot`/`Classroom`):
+
+```bash
+# Ejecutar el comando de seed (idempotente)
+.venv\Scripts\python.exe manage.py seed_initial_data
+
+# En Render puedes activar el seed al arrancar exportando la variable:
+# SEED_INITIAL_DATA=1  (ver `scripts/render_start.sh`)
+```
+
+Nota: el comando `seed_initial_data` es idempotente — no duplicará usuarios ni objetos ya existentes.
+
+Variables de entorno para controlar cantidades de demo (valores por defecto entre paréntesis):
+
+- `SEED_TEACHER_COUNT` (7): número de docentes de demo a crear.
+- `SEED_STUDENT_COUNT` (10): número de estudiantes de demo a crear.
+- `SEED_SUBJECT_COUNT` (7): número de materias de demo a crear.
+
+Ejemplo (PowerShell):
+
+```powershell
+ $env:SEED_TEACHER_COUNT = '5'; $env:SEED_STUDENT_COUNT = '20'; .venv\Scripts\python.exe manage.py seed_initial_data
+```
+
+También puedes usar un preset curado (nombres legibles, perfiles, cursos y materias)
+ejecutando:
+
+```powershell
+ .venv\Scripts\python.exe manage.py seed_initial_data --preset=curated
+```
+
 ### 8. Ejecutar el Servidor
 ```bash
 python manage.py runserver

@@ -1,0 +1,8 @@
+Hola {{ student.get_full_name }}!
+
+Se ha registrado una nueva calificación en la materia {{ grade.subject.name }}: {{ grade.value }}
+
+Revisa tu panel para más detalles.
+
+Saludos,
+El equipo de Estudify

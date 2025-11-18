@@ -4,7 +4,8 @@ Incluye forms para Grade y Attendance.
 """
 
 from django import forms
-from apps.academics.models import Grade, Attendance
+
+from apps.academics.models import Attendance, Grade
 from apps.courses.models import Course, Subject
 from apps.users.models import User
 
@@ -13,10 +14,16 @@ class GradeForm(forms.ModelForm):
     """
     Formulario para crear/editar calificaciones.
     """
-    
+
     class Meta:
         model = Grade
-        fields = ['student', 'subject', 'value', 'grade_type', 'weight', 'comments']
+        fields = [
+            'student',
+            'subject',
+            'value',
+            'grade_type',
+            'weight',
+            'comments']
         widgets = {
             'student': forms.Select(attrs={'class': 'form-control'}),
             'subject': forms.Select(attrs={'class': 'form-control'}),
@@ -43,13 +50,13 @@ class GradeForm(forms.ModelForm):
         # Permitir pasar el docente actual para filtrar
         teacher = kwargs.pop('teacher', None)
         super().__init__(*args, **kwargs)
-        
+
         # Filtrar solo estudiantes
         self.fields['student'].queryset = User.objects.filter(
             role=User.UserRole.STUDENT,
             is_active=True
         )
-        
+
         # Si hay un docente, filtrar materias que imparte
         if teacher and teacher.is_teacher:
             self.fields['subject'].queryset = Subject.objects.filter(
@@ -62,7 +69,7 @@ class GradeForm(forms.ModelForm):
         cleaned_data = super().clean()
         student = cleaned_data.get('student')
         subject = cleaned_data.get('subject')
-        
+
         if student and subject:
             # Verificar que el estudiante esté inscrito en el curso
             from apps.courses.models import CourseEnrollment
@@ -74,7 +81,7 @@ class GradeForm(forms.ModelForm):
                 raise forms.ValidationError(
                     'El estudiante no está inscrito en el curso de esta materia.'
                 )
-        
+
         return cleaned_data
 
 
@@ -82,7 +89,7 @@ class AttendanceForm(forms.ModelForm):
     """
     Formulario para registrar asistencia.
     """
-    
+
     class Meta:
         model = Attendance
         fields = ['student', 'course', 'date', 'status', 'notes']
@@ -103,13 +110,13 @@ class AttendanceForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         teacher = kwargs.pop('teacher', None)
         super().__init__(*args, **kwargs)
-        
+
         # Filtrar solo estudiantes
         self.fields['student'].queryset = User.objects.filter(
             role=User.UserRole.STUDENT,
             is_active=True
         )
-        
+
         # Si hay docente, filtrar cursos que imparte
         if teacher and teacher.is_teacher:
             self.fields['course'].queryset = Course.objects.filter(
@@ -122,7 +129,7 @@ class AttendanceForm(forms.ModelForm):
         cleaned_data = super().clean()
         student = cleaned_data.get('student')
         course = cleaned_data.get('course')
-        
+
         if student and course:
             # Verificar que el estudiante esté inscrito en el curso
             from apps.courses.models import CourseEnrollment
@@ -134,7 +141,7 @@ class AttendanceForm(forms.ModelForm):
                 raise forms.ValidationError(
                     'El estudiante no está inscrito en este curso.'
                 )
-        
+
         return cleaned_data
 
 
@@ -154,11 +161,11 @@ class BulkAttendanceForm(forms.Form):
         }),
         label='Fecha'
     )
-    
+
     def __init__(self, *args, **kwargs):
         teacher = kwargs.pop('teacher', None)
         super().__init__(*args, **kwargs)
-        
+
         # Filtrar cursos del docente
         if teacher and teacher.is_teacher:
             self.fields['course'].queryset = Course.objects.filter(
@@ -193,8 +200,13 @@ class GradeFilterForm(forms.Form):
         label='Estudiante'
     )
     grade_type = forms.ChoiceField(
-        choices=[('', 'Todos')] + list(Grade._meta.get_field('grade_type').choices),
+        choices=[
+            ('',
+             'Todos')] +
+        list(
+            Grade._meta.get_field('grade_type').choices),
         required=False,
-        widget=forms.Select(attrs={'class': 'form-control'}),
-        label='Tipo'
-    )
+        widget=forms.Select(
+            attrs={
+                'class': 'form-control'}),
+        label='Tipo')

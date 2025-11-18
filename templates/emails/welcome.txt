@@ -1,0 +1,6 @@
+Hola {{ user.get_full_name }}!
+
+Bienvenido a Estudify. Tu cuenta ha sido creada correctamente.
+
+Saludos,
+El equipo de Estudify

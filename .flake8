@@ -1,0 +1,15 @@
+[flake8]
+max-line-length = 127
+exclude =
+    .venv,
+    __pycache__,
+    */migrations/*,
+    staticfiles/,
+    media/
+ignore =
+    W503,
+    W504
+per-file-ignores =
+    __init__.py:F401
+    */migrations/*.py:E501
+max-complexity = 10

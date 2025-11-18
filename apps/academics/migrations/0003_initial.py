@@ -19,46 +19,99 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='attendance',
             name='recorded_by',
-            field=models.ForeignKey(help_text='Docente que registró la asistencia', limit_choices_to={'role': 'TEACHER'}, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='attendances_recorded', to=settings.AUTH_USER_MODEL, verbose_name='Registrado por'),
+            field=models.ForeignKey(
+                help_text='Docente que registró la asistencia',
+                limit_choices_to={
+                    'role': 'TEACHER'},
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name='attendances_recorded',
+                to=settings.AUTH_USER_MODEL,
+                verbose_name='Registrado por'),
         ),
         migrations.AddField(
             model_name='attendance',
             name='student',
-            field=models.ForeignKey(help_text='Estudiante del registro de asistencia', limit_choices_to={'role': 'STUDENT'}, on_delete=django.db.models.deletion.CASCADE, related_name='attendances', to=settings.AUTH_USER_MODEL, verbose_name='Estudiante'),
+            field=models.ForeignKey(
+                help_text='Estudiante del registro de asistencia',
+                limit_choices_to={
+                    'role': 'STUDENT'},
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name='attendances',
+                to=settings.AUTH_USER_MODEL,
+                verbose_name='Estudiante'),
         ),
         migrations.AddField(
             model_name='grade',
             name='graded_by',
-            field=models.ForeignKey(help_text='Docente que asignó la calificación', limit_choices_to={'role': 'TEACHER'}, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='grades_given', to=settings.AUTH_USER_MODEL, verbose_name='Calificado por'),
+            field=models.ForeignKey(
+                help_text='Docente que asignó la calificación',
+                limit_choices_to={
+                    'role': 'TEACHER'},
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name='grades_given',
+                to=settings.AUTH_USER_MODEL,
+                verbose_name='Calificado por'),
         ),
         migrations.AddField(
             model_name='grade',
             name='student',
-            field=models.ForeignKey(help_text='Estudiante calificado', limit_choices_to={'role': 'STUDENT'}, on_delete=django.db.models.deletion.CASCADE, related_name='grades', to=settings.AUTH_USER_MODEL, verbose_name='Estudiante'),
+            field=models.ForeignKey(
+                help_text='Estudiante calificado',
+                limit_choices_to={
+                    'role': 'STUDENT'},
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name='grades',
+                to=settings.AUTH_USER_MODEL,
+                verbose_name='Estudiante'),
         ),
         migrations.AddField(
             model_name='grade',
             name='subject',
-            field=models.ForeignKey(help_text='Materia calificada', on_delete=django.db.models.deletion.CASCADE, related_name='grades', to='courses.subject', verbose_name='Materia'),
+            field=models.ForeignKey(
+                help_text='Materia calificada',
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name='grades',
+                to='courses.subject',
+                verbose_name='Materia'),
         ),
         migrations.AddIndex(
             model_name='attendance',
-            index=models.Index(fields=['student', 'date'], name='academics_a_student_ec0522_idx'),
+            index=models.Index(
+                fields=[
+                    'student',
+                    'date'],
+                name='academics_a_student_ec0522_idx'),
         ),
         migrations.AddIndex(
             model_name='attendance',
-            index=models.Index(fields=['course', 'date'], name='academics_a_course__65cddc_idx'),
+            index=models.Index(
+                fields=[
+                    'course',
+                    'date'],
+                name='academics_a_course__65cddc_idx'),
         ),
         migrations.AlterUniqueTogether(
             name='attendance',
-            unique_together={('student', 'course', 'date')},
+            unique_together={
+                (
+                    'student',
+                    'course',
+                    'date')},
         ),
         migrations.AddIndex(
             model_name='grade',
-            index=models.Index(fields=['student', 'subject'], name='academics_g_student_de4c78_idx'),
+            index=models.Index(
+                fields=[
+                    'student',
+                    'subject'],
+                name='academics_g_student_de4c78_idx'),
         ),
         migrations.AddIndex(
             model_name='grade',
-            index=models.Index(fields=['graded_date'], name='academics_g_graded__2fa195_idx'),
+            index=models.Index(
+                fields=['graded_date'],
+                name='academics_g_graded__2fa195_idx'),
         ),
     ]

@@ -1,11 +1,12 @@
-import pytest
-from rest_framework.test import APIClient
-from rest_framework import status
-from django.contrib.auth import get_user_model
-from apps.courses.models import Course, Subject, CourseEnrollment
-from apps.academics.models import Grade
-from datetime import date
 from decimal import Decimal
+
+import pytest
+from django.contrib.auth import get_user_model
+from rest_framework import status
+from rest_framework.test import APIClient
+
+from apps.academics.models import Grade
+from apps.courses.models import Course, CourseEnrollment, Subject
 
 User = get_user_model()
 
@@ -65,7 +66,7 @@ class TestUserAPI:
         # Sin autenticación
         response = api_client.get('/api/users/')
         assert response.status_code == status.HTTP_403_FORBIDDEN
-        
+
         # Con autenticación
         api_client.force_authenticate(user=admin_user)
         response = api_client.get('/api/users/')
@@ -75,7 +76,7 @@ class TestUserAPI:
         """Test: Obtener información del usuario actual."""
         api_client.force_authenticate(user=student_user)
         response = api_client.get('/api/users/me/')
-        
+
         assert response.status_code == status.HTTP_200_OK
         assert response.data['username'] == 'student'
         assert response.data['role'] == 'STUDENT'
@@ -83,7 +84,7 @@ class TestUserAPI:
     def test_create_user(self, api_client, admin_user):
         """Test: Crear nuevo usuario."""
         api_client.force_authenticate(user=admin_user)
-        
+
         data = {
             'username': 'newuser',
             'email': 'newuser@test.com',
@@ -92,7 +93,7 @@ class TestUserAPI:
             'last_name': 'User',
             'role': 'STUDENT'
         }
-        
+
         response = api_client.post('/api/users/', data)
         assert response.status_code == status.HTTP_201_CREATED
         assert User.objects.filter(username='newuser').exists()
@@ -100,12 +101,13 @@ class TestUserAPI:
     def test_toggle_user_status(self, api_client, admin_user, student_user):
         """Test: Activar/desactivar usuario."""
         api_client.force_authenticate(user=admin_user)
-        
+
         assert student_user.is_active
-        
-        response = api_client.post(f'/api/users/{student_user.id}/toggle_status/')
+
+        response = api_client.post(
+            f'/api/users/{student_user.id}/toggle_status/')
         assert response.status_code == status.HTTP_200_OK
-        
+
         student_user.refresh_from_db()
         assert not student_user.is_active
 
@@ -125,17 +127,17 @@ class TestCourseAPI:
             semester=1,
             teacher=teacher_user
         )
-        
+
         api_client.force_authenticate(user=teacher_user)
         response = api_client.get('/api/courses/')
-        
+
         assert response.status_code == status.HTTP_200_OK
         assert len(response.data['results']) == 1
 
     def test_create_course(self, api_client, teacher_user):
         """Test: Crear curso."""
         api_client.force_authenticate(user=teacher_user)
-        
+
         data = {
             'name': 'New Course',
             'code': 'NEW001',
@@ -144,7 +146,7 @@ class TestCourseAPI:
             'teacher': teacher_user.id,
             'max_students': 30
         }
-        
+
         response = api_client.post('/api/courses/', data)
         assert response.status_code == status.HTTP_201_CREATED
         assert Course.objects.filter(code='NEW001').exists()
@@ -163,10 +165,10 @@ class TestCourseAPI:
             student=student_user,
             course=course
         )
-        
+
         api_client.force_authenticate(user=teacher_user)
         response = api_client.get(f'/api/courses/{course.id}/students/')
-        
+
         assert response.status_code == status.HTTP_200_OK
         assert len(response.data) == 1
         assert response.data[0]['username'] == 'student'
@@ -203,10 +205,15 @@ class TestGradeAPI:
             'enrollment': enrollment
         }
 
-    def test_create_grade(self, api_client, teacher_user, student_user, setup_grade_data):
+    def test_create_grade(
+            self,
+            api_client,
+            teacher_user,
+            student_user,
+            setup_grade_data):
         """Test: Crear calificación."""
         api_client.force_authenticate(user=teacher_user)
-        
+
         data = {
             'student': student_user.id,
             'subject': setup_grade_data['subject'].id,
@@ -215,12 +222,17 @@ class TestGradeAPI:
             'weight': '30.0',
             'comments': 'Excelente trabajo'
         }
-        
+
         response = api_client.post('/api/grades/', data)
         assert response.status_code == status.HTTP_201_CREATED
         assert Grade.objects.filter(student=student_user).exists()
 
-    def test_grade_statistics(self, api_client, teacher_user, student_user, setup_grade_data):
+    def test_grade_statistics(
+            self,
+            api_client,
+            teacher_user,
+            student_user,
+            setup_grade_data):
         """Test: Obtener estadísticas de calificaciones."""
         # Crear algunas calificaciones
         subject = setup_grade_data['subject']
@@ -233,14 +245,15 @@ class TestGradeAPI:
                 weight=Decimal('30.0'),
                 graded_by=teacher_user
             )
-        
+
         api_client.force_authenticate(user=teacher_user)
         response = api_client.get('/api/grades/statistics/')
-        
+
         assert response.status_code == status.HTTP_200_OK
         assert len(response.data) > 0
 
-    def test_create_grade_without_enrollment_fails(self, api_client, teacher_user, student_user):
+    def test_create_grade_without_enrollment_fails(
+            self, api_client, teacher_user, student_user):
         """Test: No se puede crear calificación sin inscripción."""
         course = Course.objects.create(
             name='Test Course',
@@ -255,9 +268,9 @@ class TestGradeAPI:
             course=course,
             teacher=teacher_user
         )
-        
+
         api_client.force_authenticate(user=teacher_user)
-        
+
         data = {
             'student': student_user.id,
             'subject': subject.id,
@@ -265,7 +278,7 @@ class TestGradeAPI:
             'grade_type': 'EXAM',
             'weight': '30.0'
         }
-        
+
         response = api_client.post('/api/grades/', data)
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
@@ -286,7 +299,7 @@ class TestEnrollmentAPI:
             teacher=teacher_user,
             max_students=10
         )
-        
+
         # Crear estudiantes
         students = []
         for i in range(3):
@@ -296,21 +309,22 @@ class TestEnrollmentAPI:
                 role=User.UserRole.STUDENT
             )
             students.append(student.id)
-        
+
         api_client.force_authenticate(user=teacher_user)
-        
+
         data = {
             'course_id': course.id,
             'student_ids': students
         }
-        
+
         response = api_client.post('/api/enrollments/bulk_enroll/', data)
-        
+
         assert response.status_code == status.HTTP_200_OK
         assert response.data['enrolled_count'] == 3
         assert course.enrollments.count() == 3
 
-    def test_enrollment_duplicate_fails(self, api_client, teacher_user, student_user):
+    def test_enrollment_duplicate_fails(
+            self, api_client, teacher_user, student_user):
         """Test: No se puede inscribir dos veces al mismo estudiante."""
         course = Course.objects.create(
             name='Test Course',
@@ -319,18 +333,18 @@ class TestEnrollmentAPI:
             semester=1,
             teacher=teacher_user
         )
-        
+
         api_client.force_authenticate(user=teacher_user)
-        
+
         data = {
             'student': student_user.id,
             'course': course.id
         }
-        
+
         # Primera inscripción
         response = api_client.post('/api/enrollments/', data)
         assert response.status_code == status.HTTP_201_CREATED
-        
+
         # Segunda inscripción (debe fallar)
         response = api_client.post('/api/enrollments/', data)
         assert response.status_code == status.HTTP_400_BAD_REQUEST
@@ -341,7 +355,8 @@ class TestEnrollmentAPI:
 class TestFullWorkflow:
     """Tests de integración del flujo completo."""
 
-    def test_complete_student_workflow(self, api_client, teacher_user, student_user):
+    def test_complete_student_workflow(
+            self, api_client, teacher_user, student_user):
         """Test: Flujo completo desde inscripción hasta calificación."""
         # 1. Crear curso
         course = Course.objects.create(
@@ -351,7 +366,7 @@ class TestFullWorkflow:
             semester=1,
             teacher=teacher_user
         )
-        
+
         # 2. Crear materia
         subject = Subject.objects.create(
             name='Integration Subject',
@@ -359,13 +374,13 @@ class TestFullWorkflow:
             course=course,
             teacher=teacher_user
         )
-        
+
         # 3. Inscribir estudiante
-        enrollment = CourseEnrollment.objects.create(
+        CourseEnrollment.objects.create(
             student=student_user,
             course=course
         )
-        
+
         # 4. Crear calificación
         api_client.force_authenticate(user=teacher_user)
         grade_data = {
@@ -377,7 +392,7 @@ class TestFullWorkflow:
         }
         response = api_client.post('/api/grades/', grade_data)
         assert response.status_code == status.HTTP_201_CREATED
-        
+
         # 5. Verificar calificación
         api_client.force_authenticate(user=student_user)
         response = api_client.get(f'/api/grades/?student={student_user.id}')

@@ -4,8 +4,9 @@ Incluye registro, login, y edición de perfil.
 """
 
 from django import forms
-from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth import get_user_model
+from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
+
 from apps.users.models import Profile
 
 User = get_user_model()
@@ -46,7 +47,14 @@ class UserRegistrationForm(UserCreationForm):
 
     class Meta:
         model = User
-        fields = ['username', 'email', 'first_name', 'last_name', 'role', 'password1', 'password2']
+        fields = [
+            'username',
+            'email',
+            'first_name',
+            'last_name',
+            'role',
+            'password1',
+            'password2']
         widgets = {
             'username': forms.TextInput(attrs={
                 'class': 'form-control',
@@ -92,14 +100,18 @@ class UserLoginForm(AuthenticationForm):
     )
 
     def clean_username(self):
-        """Permitir iniciar sesión usando email: si el campo contiene '@', buscar el usuario por email y devolver su username."""
+        """Permitir iniciar sesión usando email.
+
+        Si el campo contiene '@', buscar el usuario por email y devolver su username.
+        """
         username = self.cleaned_data.get('username')
         if username and '@' in username:
             try:
                 user = User.objects.get(email__iexact=username)
                 return user.username
             except User.DoesNotExist:
-                # Dejar que la validación normal maneje el error (credenciales inválidas)
+                # Dejar que la validación normal maneje el error (credenciales
+                # inválidas)
                 return username
         return username
 
@@ -162,7 +174,7 @@ class UserProfileForm(forms.ModelForm):
     def save(self, commit=True):
         """Guardar tanto Profile como User."""
         profile = super().save(commit=False)
-        
+
         # Actualizar campos de User
         user = profile.user
         user.first_name = self.cleaned_data.get('first_name', '')
@@ -170,9 +182,9 @@ class UserProfileForm(forms.ModelForm):
         user.email = self.cleaned_data.get('email', '')
         user.phone = self.cleaned_data.get('phone', '')
         user.date_of_birth = self.cleaned_data.get('date_of_birth')
-        
+
         if commit:
             user.save()
             profile.save()
-        
+
         return profile

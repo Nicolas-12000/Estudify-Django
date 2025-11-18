@@ -5,9 +5,8 @@ como Render (usar `DATABASE_URL`, `CELERY_BROKER_URL`, etc. en el entorno).
 """
 
 from pathlib import Path
-import os
-from decouple import config, Csv
 
+from decouple import Csv, config
 
 # Build paths
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -15,7 +14,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Security
 SECRET_KEY = config('SECRET_KEY', default='django-insecure-dev-key-change-me')
 DEBUG = config('DEBUG', default=True, cast=bool)
-ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1', cast=Csv())
+ALLOWED_HOSTS = config(
+    'ALLOWED_HOSTS',
+    default='localhost,127.0.0.1',
+    cast=Csv())
 
 # Application definition
 INSTALLED_APPS = [
@@ -83,7 +85,8 @@ TEMPLATES = [
 WSGI_APPLICATION = 'config.wsgi.application'
 
 # Database
-# Default: sqlite for local development. In production use DATABASE_URL (Postgres).
+# Default: sqlite for local development. In production use DATABASE_URL
+# (Postgres).
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -93,9 +96,11 @@ DATABASES = {
 
 DATABASE_URL = config('DATABASE_URL', default='')
 if DATABASE_URL:
-    # simple parsing: allow postgres URL like postgres://user:pass@host:port/dbname
+    # simple parsing: allow postgres URL like
+    # postgres://user:pass@host:port/dbname
     import dj_database_url
-    DATABASES['default'] = dj_database_url.parse(DATABASE_URL, conn_max_age=600)
+    DATABASES['default'] = dj_database_url.parse(
+        DATABASE_URL, conn_max_age=600)
 
 # Password validation (default Django validators)
 AUTH_PASSWORD_VALIDATORS = [
@@ -156,11 +161,16 @@ SPECTACULAR_SETTINGS = {
 }
 
 # CORS (development default to a frontend running on 3000)
-CORS_ALLOWED_ORIGINS = config('CORS_ALLOWED_ORIGINS', default='http://localhost:3000', cast=Csv())
+CORS_ALLOWED_ORIGINS = config(
+    'CORS_ALLOWED_ORIGINS',
+    default='http://localhost:3000',
+    cast=Csv())
 CORS_ALLOW_CREDENTIALS = True
 
 # Email configuration
-EMAIL_BACKEND = config('EMAIL_BACKEND', default='django.core.mail.backends.console.EmailBackend')
+EMAIL_BACKEND = config(
+    'EMAIL_BACKEND',
+    default='django.core.mail.backends.console.EmailBackend')
 EMAIL_HOST = config('EMAIL_HOST', default='smtp.gmail.com')
 EMAIL_PORT = config('EMAIL_PORT', default=587, cast=int)
 EMAIL_USE_TLS = config('EMAIL_USE_TLS', default=True, cast=bool)
@@ -169,8 +179,12 @@ EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
 DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default=EMAIL_HOST_USER)
 
 # Celery configuration
-CELERY_BROKER_URL = config('CELERY_BROKER_URL', default='redis://localhost:6379/0')
-CELERY_RESULT_BACKEND = config('CELERY_RESULT_BACKEND', default='redis://localhost:6379/0')
+CELERY_BROKER_URL = config(
+    'CELERY_BROKER_URL',
+    default='redis://localhost:6379/0')
+CELERY_RESULT_BACKEND = config(
+    'CELERY_RESULT_BACKEND',
+    default='redis://localhost:6379/0')
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
@@ -184,10 +198,13 @@ LOGOUT_REDIRECT_URL = '/'
 
 # Security settings for production
 if not DEBUG:
-    SECURE_SSL_REDIRECT = config('SECURE_SSL_REDIRECT', default=True, cast=bool)
-    SESSION_COOKIE_SECURE = config('SESSION_COOKIE_SECURE', default=True, cast=bool)
+    SECURE_SSL_REDIRECT = config(
+        'SECURE_SSL_REDIRECT',
+        default=True,
+        cast=bool)
+    SESSION_COOKIE_SECURE = config(
+        'SESSION_COOKIE_SECURE', default=True, cast=bool)
     CSRF_COOKIE_SECURE = config('CSRF_COOKIE_SECURE', default=True, cast=bool)
     SECURE_BROWSER_XSS_FILTER = True
     SECURE_CONTENT_TYPE_NOSNIFF = True
     X_FRAME_OPTIONS = 'DENY'
-

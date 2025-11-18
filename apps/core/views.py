@@ -7,6 +7,6 @@ def home(request):
     Keeps a minimal view for Sprint 0 while enabling template-driven UI.
     """
     return render(request, "base.html", {})
-from django.shortcuts import render
+
 
 # Create your views here.

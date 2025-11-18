@@ -1,9 +1,12 @@
-from rest_framework import serializers
 from decimal import Decimal
+
 from django.contrib.auth import get_user_model
+from rest_framework import serializers
+
+from apps.academics.models import Attendance, Grade
+from apps.courses.models import Course, CourseEnrollment, Subject
+from apps.courses.models import TimeSlot, Classroom, CourseSession
 from apps.users.models import Profile
-from apps.courses.models import Course, Subject, CourseEnrollment
-from apps.academics.models import Grade, Attendance
 
 User = get_user_model()
 
@@ -13,11 +16,11 @@ class UserSerializer(serializers.ModelSerializer):
     Serializer para el modelo User.
     """
     full_name = serializers.CharField(source='get_full_name', read_only=True)
-    
+
     class Meta:
         model = User
         fields = [
-            'id', 'username', 'email', 'first_name', 'last_name', 
+            'id', 'username', 'email', 'first_name', 'last_name',
             'full_name', 'role', 'is_active', 'date_joined'
         ]
         read_only_fields = ['id', 'date_joined']
@@ -28,10 +31,17 @@ class ProfileSerializer(serializers.ModelSerializer):
     Serializer para el modelo Profile.
     """
     user = UserSerializer(read_only=True)
-    
+
     class Meta:
         model = Profile
-        fields = ['id', 'user', 'bio', 'address', 'city', 'country', 'created_at']
+        fields = [
+            'id',
+            'user',
+            'bio',
+            'address',
+            'city',
+            'country',
+            'created_at']
         read_only_fields = ['id', 'created_at']
 
 
@@ -39,18 +49,47 @@ class CourseSerializer(serializers.ModelSerializer):
     """
     Serializer para el modelo Course.
     """
-    teacher_name = serializers.CharField(source='teacher.get_full_name', read_only=True)
+    teacher_name = serializers.CharField(
+        source='teacher.get_full_name', read_only=True)
     enrolled_count = serializers.IntegerField(read_only=True)
     is_full = serializers.BooleanField(read_only=True)
-    
+
     class Meta:
         model = Course
         fields = [
             'id', 'name', 'code', 'description', 'academic_year', 'semester',
-            'teacher', 'teacher_name', 'max_students', 'enrolled_count', 
+            'teacher', 'teacher_name', 'max_students', 'enrolled_count',
             'is_full', 'is_active', 'created_at'
         ]
         read_only_fields = ['id', 'created_at', 'enrolled_count', 'is_full']
+
+
+class TimeSlotSerializer(serializers.ModelSerializer):
+    day = serializers.CharField(source='get_day_of_week_display', read_only=True)
+
+    class Meta:
+        model = TimeSlot
+        fields = ['id', 'day_of_week', 'day', 'start_time', 'end_time']
+
+
+class ClassroomSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Classroom
+        fields = ['id', 'name', 'location', 'capacity']
+
+
+class CourseSessionSerializer(serializers.ModelSerializer):
+    timeslot = TimeSlotSerializer(read_only=True)
+    classroom = ClassroomSerializer(source='classroom_fk', read_only=True)
+
+    class Meta:
+        model = CourseSession
+        fields = ['id', 'course', 'timeslot', 'classroom', 'recurrence', 'notes']
+
+
+# Extend CourseSerializer to include sessions as nested (read-only)
+CourseSerializer._declared_fields['sessions'] = CourseSessionSerializer(many=True, read_only=True)
+CourseSerializer.Meta.fields.append('sessions')
 
 
 class SubjectSerializer(serializers.ModelSerializer):
@@ -58,12 +97,13 @@ class SubjectSerializer(serializers.ModelSerializer):
     Serializer para el modelo Subject.
     """
     course_name = serializers.CharField(source='course.name', read_only=True)
-    teacher_name = serializers.CharField(source='teacher.get_full_name', read_only=True)
-    
+    teacher_name = serializers.CharField(
+        source='teacher.get_full_name', read_only=True)
+
     class Meta:
         model = Subject
         fields = [
-            'id', 'name', 'code', 'description', 'credits', 
+            'id', 'name', 'code', 'description', 'credits',
             'course', 'course_name', 'teacher', 'teacher_name',
             'is_active', 'created_at'
         ]
@@ -74,9 +114,10 @@ class CourseEnrollmentSerializer(serializers.ModelSerializer):
     """
     Serializer para el modelo CourseEnrollment.
     """
-    student_name = serializers.CharField(source='student.get_full_name', read_only=True)
+    student_name = serializers.CharField(
+        source='student.get_full_name', read_only=True)
     course_name = serializers.CharField(source='course.name', read_only=True)
-    
+
     class Meta:
         model = CourseEnrollment
         fields = [
@@ -84,14 +125,14 @@ class CourseEnrollmentSerializer(serializers.ModelSerializer):
             'created_at', 'is_active'
         ]
         read_only_fields = ['id', 'created_at']
-    
+
     def validate(self, data):
         """
         Validar que el estudiante no esté ya inscrito en el curso.
         """
         student = data.get('student')
         course = data.get('course')
-        
+
         # Verificar si ya existe inscripción activa
         if CourseEnrollment.objects.filter(
             student=student,
@@ -101,13 +142,13 @@ class CourseEnrollmentSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 'El estudiante ya está inscrito en este curso.'
             )
-        
+
         # Verificar que el curso no esté lleno
         if course.is_full:
             raise serializers.ValidationError(
                 'El curso ha alcanzado su capacidad máxima.'
             )
-        
+
         return data
 
 
@@ -115,12 +156,15 @@ class GradeSerializer(serializers.ModelSerializer):
     """
     Serializer para el modelo Grade.
     """
-    student_name = serializers.CharField(source='student.get_full_name', read_only=True)
+    student_name = serializers.CharField(
+        source='student.get_full_name', read_only=True)
     subject_name = serializers.CharField(source='subject.name', read_only=True)
-    graded_by_name = serializers.CharField(source='graded_by.get_full_name', read_only=True)
+    graded_by_name = serializers.CharField(
+        source='graded_by.get_full_name', read_only=True)
     is_passing = serializers.BooleanField(read_only=True)
     letter_grade = serializers.CharField(read_only=True)
-    # Explicitly declare Decimal fields to avoid float-based validators warnings
+    # Explicitly declare Decimal fields to avoid float-based validators
+    # warnings
     value = serializers.DecimalField(
         max_digits=3,
         decimal_places=1,
@@ -133,7 +177,7 @@ class GradeSerializer(serializers.ModelSerializer):
         min_value=Decimal('0.0'),
         max_value=Decimal('100.0')
     )
-    
+
     class Meta:
         model = Grade
         fields = [
@@ -143,14 +187,14 @@ class GradeSerializer(serializers.ModelSerializer):
             'is_passing', 'letter_grade', 'created_at'
         ]
         read_only_fields = ['id', 'graded_date', 'created_at']
-    
+
     def validate(self, data):
         """
         Validar que el estudiante esté inscrito en el curso de la materia.
         """
         student = data.get('student')
         subject = data.get('subject')
-        
+
         if not CourseEnrollment.objects.filter(
             student=student,
             course=subject.course,
@@ -159,7 +203,7 @@ class GradeSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 'El estudiante no está inscrito en el curso de esta materia.'
             )
-        
+
         return data
 
 
@@ -167,11 +211,14 @@ class AttendanceSerializer(serializers.ModelSerializer):
     """
     Serializer para el modelo Attendance.
     """
-    student_name = serializers.CharField(source='student.get_full_name', read_only=True)
+    student_name = serializers.CharField(
+        source='student.get_full_name', read_only=True)
     course_name = serializers.CharField(source='course.name', read_only=True)
-    recorded_by_name = serializers.CharField(source='recorded_by.get_full_name', read_only=True)
-    status_display = serializers.CharField(source='get_status_display', read_only=True)
-    
+    recorded_by_name = serializers.CharField(
+        source='recorded_by.get_full_name', read_only=True)
+    status_display = serializers.CharField(
+        source='get_status_display', read_only=True)
+
     class Meta:
         model = Attendance
         fields = [
@@ -180,14 +227,14 @@ class AttendanceSerializer(serializers.ModelSerializer):
             'recorded_by', 'recorded_by_name', 'created_at'
         ]
         read_only_fields = ['id', 'created_at']
-    
+
     def validate(self, data):
         """
         Validar que el estudiante esté inscrito en el curso.
         """
         student = data.get('student')
         course = data.get('course')
-        
+
         if not CourseEnrollment.objects.filter(
             student=student,
             course=course,
@@ -196,7 +243,7 @@ class AttendanceSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 'El estudiante no está inscrito en este curso.'
             )
-        
+
         return data
 
 

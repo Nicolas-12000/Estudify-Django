@@ -1,10 +1,12 @@
-import pytest
+from datetime import date
 from decimal import Decimal
+
+import pytest
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
-from datetime import date
-from apps.courses.models import Course, Subject, CourseEnrollment
-from apps.academics.models import Grade, Attendance
+
+from apps.academics.models import Attendance, Grade
+from apps.courses.models import Course, CourseEnrollment, Subject
 
 User = get_user_model()
 
@@ -82,7 +84,8 @@ class TestGradeModel:
         assert grade.value == Decimal('4.5')
         assert grade.is_passing
 
-    def test_grade_str_representation(self, student, subject, teacher, enrollment):
+    def test_grade_str_representation(
+            self, student, subject, teacher, enrollment):
         """Test: Representación en string de calificación."""
         grade = Grade.objects.create(
             student=student,
@@ -107,7 +110,7 @@ class TestGradeModel:
             value=Decimal('2.8'),
             graded_by=teacher
         )
-        
+
         assert passing_grade.is_passing
         assert not failing_grade.is_passing
 
@@ -120,7 +123,7 @@ class TestGradeModel:
             (Decimal('2.5'), 'D'),
             (Decimal('1.5'), 'F'),
         ]
-        
+
         for value, expected_letter in test_cases:
             grade = Grade.objects.create(
                 student=student,
@@ -131,7 +134,8 @@ class TestGradeModel:
             assert grade.letter_grade == expected_letter
             grade.delete()
 
-    def test_grade_validation_student_not_enrolled(self, student, subject, teacher):
+    def test_grade_validation_student_not_enrolled(
+            self, student, subject, teacher):
         """Test: Validar que el estudiante esté inscrito en el curso."""
         # Crear calificación sin inscripción previa
         grade = Grade(
@@ -140,7 +144,7 @@ class TestGradeModel:
             value=Decimal('4.0'),
             graded_by=teacher
         )
-        
+
         with pytest.raises(ValidationError):
             grade.clean()
 
@@ -154,7 +158,7 @@ class TestGradeModel:
             graded_by=teacher
         )
         assert grade.value == Decimal('5.0')
-        
+
         # Valores fuera de rango deberían fallar en la validación del modelo
         # pero no en la creación directa (se valida en forms)
 
@@ -187,7 +191,8 @@ class TestAttendanceModel:
         assert attendance.course == course
         assert attendance.status == Attendance.AttendanceStatus.PRESENT
 
-    def test_attendance_str_representation(self, student, course, teacher, enrollment):
+    def test_attendance_str_representation(
+            self, student, course, teacher, enrollment):
         """Test: Representación en string de asistencia."""
         attendance = Attendance.objects.create(
             student=student,
@@ -196,7 +201,8 @@ class TestAttendanceModel:
             status=Attendance.AttendanceStatus.PRESENT,
             recorded_by=teacher
         )
-        expected = f'{student.get_full_name()} - {course.name} (2025-01-15): Presente'
+        expected = f'{student.get_full_name(
+        )} - {course.name} (2025-01-15): Presente'
         assert str(attendance) == expected
 
     def test_attendance_statuses(self, student, course, teacher, enrollment):
@@ -207,7 +213,7 @@ class TestAttendanceModel:
             Attendance.AttendanceStatus.LATE,
             Attendance.AttendanceStatus.EXCUSED,
         ]
-        
+
         for status in statuses:
             attendance = Attendance.objects.create(
                 student=student,
@@ -219,7 +225,8 @@ class TestAttendanceModel:
             assert attendance.status == status
             attendance.delete()
 
-    def test_attendance_unique_per_day(self, student, course, teacher, enrollment):
+    def test_attendance_unique_per_day(
+            self, student, course, teacher, enrollment):
         """Test: Solo una asistencia por estudiante por curso por día."""
         Attendance.objects.create(
             student=student,
@@ -228,7 +235,7 @@ class TestAttendanceModel:
             status=Attendance.AttendanceStatus.PRESENT,
             recorded_by=teacher
         )
-        
+
         # Intentar crear otro registro para el mismo día
         with pytest.raises(Exception):  # IntegrityError
             Attendance.objects.create(
@@ -239,7 +246,8 @@ class TestAttendanceModel:
                 recorded_by=teacher
             )
 
-    def test_attendance_validation_student_not_enrolled(self, student, course, teacher):
+    def test_attendance_validation_student_not_enrolled(
+            self, student, course, teacher):
         """Test: Validar que el estudiante esté inscrito en el curso."""
         attendance = Attendance(
             student=student,
@@ -248,18 +256,19 @@ class TestAttendanceModel:
             status=Attendance.AttendanceStatus.PRESENT,
             recorded_by=teacher
         )
-        
+
         with pytest.raises(ValidationError):
             attendance.clean()
 
-    def test_multiple_attendance_dates(self, student, course, teacher, enrollment):
+    def test_multiple_attendance_dates(
+            self, student, course, teacher, enrollment):
         """Test: Múltiples registros en diferentes fechas."""
         dates = [
             date(2025, 1, 10),
             date(2025, 1, 11),
             date(2025, 1, 12),
         ]
-        
+
         for d in dates:
             Attendance.objects.create(
                 student=student,
@@ -268,6 +277,5 @@ class TestAttendanceModel:
                 status=Attendance.AttendanceStatus.PRESENT,
                 recorded_by=teacher
             )
-        
-        assert student.attendances.count() == 3
 
+        assert student.attendances.count() == 3

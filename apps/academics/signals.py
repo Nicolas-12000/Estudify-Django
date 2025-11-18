@@ -9,8 +9,8 @@ def notify_student_on_grade_creation(sender, instance, created, **kwargs):
     """Notificar al estudiante cuando se crea una calificación (asíncrono si hay Celery)."""
     if created:
         try:
-            from apps.notifications.tasks import send_grade_notification
-            send_grade_notification.delay(instance.id)
+            from apps.notifications.tasks import send_grade_notification_email
+            send_grade_notification_email.delay(instance.id)
         except Exception:
             # Si no hay Celery o falla, continuar sin interrumpir
             pass

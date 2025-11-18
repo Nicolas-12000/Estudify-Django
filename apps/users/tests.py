@@ -1,5 +1,6 @@
 import pytest
 from django.contrib.auth import get_user_model
+
 from apps.users.models import Profile
 
 User = get_user_model()
@@ -89,7 +90,7 @@ class TestUserModel:
             password='pass123',
             role=User.UserRole.TEACHER
         )
-        
+
         assert student.is_student
         assert not student.is_teacher
         assert teacher.is_teacher
@@ -106,12 +107,19 @@ class TestProfileModel:
             username='testuser',
             password='pass123'
         )
-        profile = Profile.objects.create(
+        profile, created = Profile.objects.get_or_create(
             user=user,
-            bio='Test bio',
-            city='Pasto',
-            country='Colombia'
+            defaults={
+                'bio': 'Test bio',
+                'city': 'Pasto',
+                'country': 'Colombia',
+            }
         )
+        if not created:
+            profile.bio = 'Test bio'
+            profile.city = 'Pasto'
+            profile.country = 'Colombia'
+            profile.save()
         assert profile.user == user
         assert profile.bio == 'Test bio'
         assert profile.city == 'Pasto'
@@ -125,7 +133,7 @@ class TestProfileModel:
             last_name='Doe',
             password='pass123'
         )
-        profile = Profile.objects.create(user=user)
+        profile, _ = Profile.objects.get_or_create(user=user)
         assert str(profile) == 'Perfil de John Doe'
 
     def test_profile_one_to_one_relationship(self):
@@ -134,8 +142,8 @@ class TestProfileModel:
             username='testuser',
             password='pass123'
         )
-        profile = Profile.objects.create(user=user)
-        
+        profile, _ = Profile.objects.get_or_create(user=user)
+
         # Acceso desde user a profile
         assert user.profile == profile
         # Acceso desde profile a user
@@ -147,8 +155,8 @@ class TestProfileModel:
             username='testuser',
             password='pass123'
         )
-        profile = Profile.objects.create(user=user)
-        
+        profile, _ = Profile.objects.get_or_create(user=user)
+
         assert profile.is_active
         profile.soft_delete()
         profile.refresh_from_db()
@@ -160,11 +168,11 @@ class TestProfileModel:
             username='testuser',
             password='pass123'
         )
-        profile = Profile.objects.create(user=user)
-        
+        profile, _ = Profile.objects.get_or_create(user=user)
+
         profile.soft_delete()
         assert not profile.is_active
-        
+
         profile.restore()
         profile.refresh_from_db()
         assert profile.is_active

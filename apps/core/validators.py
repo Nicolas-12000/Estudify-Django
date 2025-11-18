@@ -4,6 +4,7 @@ Aseguran integridad de datos y previenen inyección/XSS.
 """
 
 import re
+
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 
@@ -16,22 +17,21 @@ def validate_name_field(value):
     """
     if not value:
         return
-    
+
     # Patrón: letras (unicode), espacios, guiones, apóstrofes
     pattern = r'^[\w\sÀ-ÿ\'-]+$'
-    
+
     if not re.match(pattern, value, re.UNICODE):
         raise ValidationError(
             _('El nombre solo puede contener letras, espacios, guiones y apóstrofes.'),
-            code='invalid_name'
-        )
-    
+            code='invalid_name')
+
     if len(value) < 2:
         raise ValidationError(
             _('El nombre debe tener al menos 2 caracteres.'),
             code='name_too_short'
         )
-    
+
     if len(value) > 150:
         raise ValidationError(
             _('El nombre no puede exceder 150 caracteres.'),
@@ -47,15 +47,14 @@ def validate_username_field(value):
     """
     if not value:
         return
-    
+
     pattern = r'^[\w.-]+$'
-    
+
     if not re.match(pattern, value):
         raise ValidationError(
             _('El nombre de usuario solo puede contener letras, números, guiones, guiones bajos y puntos.'),
-            code='invalid_username'
-        )
-    
+            code='invalid_username')
+
     if len(value) < 3:
         raise ValidationError(
             _('El nombre de usuario debe tener al menos 3 caracteres.'),
@@ -71,15 +70,14 @@ def validate_code_field(value):
     """
     if not value:
         return
-    
+
     pattern = r'^[A-Z0-9_-]+$'
-    
+
     if not re.match(pattern, value):
         raise ValidationError(
             _('El código solo puede contener letras mayúsculas, números, guiones y guiones bajos.'),
-            code='invalid_code'
-        )
-    
+            code='invalid_code')
+
     if len(value) < 2:
         raise ValidationError(
             _('El código debe tener al menos 2 caracteres.'),
@@ -95,7 +93,7 @@ def validate_text_field(value):
     """
     if not value:
         return
-    
+
     # Bloquear tags HTML/JS
     dangerous_patterns = [
         r'<script[^>]*>.*?</script>',
@@ -107,13 +105,12 @@ def validate_text_field(value):
         r'<embed',
         r'<object',
     ]
-    
+
     for pattern in dangerous_patterns:
         if re.search(pattern, value, re.IGNORECASE):
             raise ValidationError(
                 _('El texto contiene contenido no permitido (HTML/JavaScript).'),
-                code='invalid_text_content'
-            )
+                code='invalid_text_content')
 
 
 def validate_alphanumeric_with_spaces(value):
@@ -123,15 +120,14 @@ def validate_alphanumeric_with_spaces(value):
     """
     if not value:
         return
-    
+
     # Permite letras (unicode), números, espacios, comas, puntos, guiones
     pattern = r'^[\w\sÀ-ÿ,.\'-]+$'
-    
+
     if not re.match(pattern, value, re.UNICODE):
         raise ValidationError(
             _('Solo se permiten letras, números, espacios y puntuación básica (coma, punto, guión).'),
-            code='invalid_alphanumeric'
-        )
+            code='invalid_alphanumeric')
 
 
 __all__ = [

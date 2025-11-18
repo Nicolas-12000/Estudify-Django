@@ -1,5 +1,6 @@
-from django import template
 from urllib.parse import urlencode
+
+from django import template
 
 register = template.Library()
 
@@ -17,13 +18,13 @@ def query_string(context, **kwargs):
     """Build query string preserving existing params."""
     request = context['request']
     query_dict = request.GET.copy()
-    
+
     for key, value in kwargs.items():
         if value:
             query_dict[key] = value
         elif key in query_dict:
             del query_dict[key]
-    
+
     if query_dict:
         return '&' + urlencode(query_dict)
     return ''
@@ -37,13 +38,13 @@ def badge_role(role):
         'teacher': 'bg-success',
         'student': 'bg-primary',
     }
-    
+
     role_names = {
         'admin': 'Administrador',
         'teacher': 'Profesor',
         'student': 'Estudiante',
     }
-    
+
     return {
         'role': role,
         'badge_class': badge_classes.get(role, 'bg-secondary'),

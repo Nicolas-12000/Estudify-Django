@@ -18,34 +18,65 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='course',
             name='teacher',
-            field=models.ForeignKey(limit_choices_to={'role': 'TEACHER'}, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='courses_taught', to=settings.AUTH_USER_MODEL, verbose_name='Docente'),
+            field=models.ForeignKey(
+                limit_choices_to={
+                    'role': 'TEACHER'},
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name='courses_taught',
+                to=settings.AUTH_USER_MODEL,
+                verbose_name='Docente'),
         ),
         migrations.AddField(
             model_name='courseenrollment',
             name='course',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='enrollments', to='courses.course'),
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name='enrollments',
+                to='courses.course'),
         ),
         migrations.AddField(
             model_name='courseenrollment',
             name='student',
-            field=models.ForeignKey(limit_choices_to={'role': 'STUDENT'}, on_delete=django.db.models.deletion.CASCADE, related_name='enrollments', to=settings.AUTH_USER_MODEL),
+            field=models.ForeignKey(
+                limit_choices_to={
+                    'role': 'STUDENT'},
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name='enrollments',
+                to=settings.AUTH_USER_MODEL),
         ),
         migrations.AddField(
             model_name='subject',
             name='course',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='subjects', to='courses.course'),
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name='subjects',
+                to='courses.course'),
         ),
         migrations.AddField(
             model_name='subject',
             name='teacher',
-            field=models.ForeignKey(limit_choices_to={'role': 'TEACHER'}, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='subjects_taught', to=settings.AUTH_USER_MODEL),
+            field=models.ForeignKey(
+                limit_choices_to={
+                    'role': 'TEACHER'},
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name='subjects_taught',
+                to=settings.AUTH_USER_MODEL),
         ),
         migrations.AlterUniqueTogether(
             name='course',
-            unique_together={('code', 'academic_year', 'semester')},
+            unique_together={
+                (
+                    'code',
+                    'academic_year',
+                    'semester')},
         ),
         migrations.AlterUniqueTogether(
             name='courseenrollment',
-            unique_together={('student', 'course')},
+            unique_together={
+                (
+                    'student',
+                    'course')},
         ),
     ]
