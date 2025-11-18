@@ -236,34 +236,22 @@ jobs:
 
       - name: Wait for Redis to be ready
         run: |
-          python - <<'PY'
-          import socket, time, sys, subprocess
-
-          def try_redis_cli():
-              try:
-                  out = subprocess.check_output(['redis-cli', 'ping'], stderr=subprocess.STDOUT, timeout=2)
-                  return out.strip() == b'PONG'
-              except Exception:
-                  return False
-
-          for i in range(60):
-              # Prefer redis-cli ping when available
-              if try_redis_cli():
-                  print('Redis reachable (redis-cli)')
-                  sys.exit(0)
-              try:
-                  s = socket.socket()
-                  s.settimeout(1)
-                  s.connect(('localhost', 6379))
-                  s.close()
-                  print('Redis reachable (socket)')
-                  sys.exit(0)
-              except Exception:
-                  print('Waiting for Redis...')
-                  time.sleep(1)
-          print('Redis not reachable after timeout')
-          sys.exit(1)
-          PY
+          # Install redis-tools to get redis-cli command
+          sudo apt-get update -qq
+          sudo apt-get install -y redis-tools
+          
+          # Wait for Redis service to respond
+          for i in {1..60}; do
+            if redis-cli -h localhost -p 6379 ping > /dev/null 2>&1; then
+              echo "Redis is ready!"
+              exit 0
+            fi
+            echo "Waiting for Redis... ($i/60)"
+            sleep 1
+          done
+          
+          echo "Redis not reachable after 60 seconds"
+          exit 1
 
       - name: Run migrations
         run: python manage.py migrate --noinput
