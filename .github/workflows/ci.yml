@@ -237,14 +237,26 @@ jobs:
       - name: Wait for Redis to be ready
         run: |
           python - <<'PY'
-          import socket, time, sys
-          for i in range(30):
+          import socket, time, sys, subprocess
+
+          def try_redis_cli():
+              try:
+                  out = subprocess.check_output(['redis-cli', 'ping'], stderr=subprocess.STDOUT, timeout=2)
+                  return out.strip() == b'PONG'
+              except Exception:
+                  return False
+
+          for i in range(60):
+              # Prefer redis-cli ping when available
+              if try_redis_cli():
+                  print('Redis reachable (redis-cli)')
+                  sys.exit(0)
               try:
                   s = socket.socket()
                   s.settimeout(1)
                   s.connect(('localhost', 6379))
                   s.close()
-                  print('Redis reachable')
+                  print('Redis reachable (socket)')
                   sys.exit(0)
               except Exception:
                   print('Waiting for Redis...')
