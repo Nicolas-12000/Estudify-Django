@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block title %}Dashboard - Estudify{% endblock %}
+
+{% block content %}
+<div class="container">
+  <h2 class="text-danger mb-4">
+    <i class="fas fa-tachometer-alt"></i> Dashboard Administrativo
+  </h2>
+  <div class="row g-4">
+    <div class="col-md-3">
+      <div class="card bg-dark shadow-sm border-danger">
+        <div class="card-header text-white bg-danger">Usuarios Totales</div>
+        <div class="card-body">
+          <h3>{{ total_users }}</h3>
+          <p class="text-secondary mb-0">Registrados en el sistema</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card bg-dark shadow-sm border-primary">
+        <div class="card-header text-white bg-primary">Estudiantes</div>
+        <div class="card-body">
+          <h3>{{ total_students }}</h3>
+          <p class="text-secondary mb-0">Estudiantes activos</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card bg-dark shadow-sm border-success">
+        <div class="card-header text-white bg-success">Cursos</div>
+        <div class="card-body">
+          <h3>{{ total_courses }}</h3>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card bg-dark shadow-sm border-warning">
+        <div class="card-header text-white bg-warning">Materias</div>
+        <div class="card-body">
+          <h3>{{ total_subjects }}</h3>
+        </div>
+      </div>
+    </div>
+  </div>
+  <hr class="my-4 border-danger"/>
+  <div class="card bg-dark border-secondary shadow-sm">
+    <div class="card-header bg-secondary text-white">Usuarios Recientes</div>
+    <div class="card-body">
+      <ul class="list-group list-group-flush">
+        {% for user in recent_users %}
+          <li class="list-group-item bg-dark text-light">
+            <i class="fas fa-user"></i> {{ user.username }} - {{ user.get_full_name }}
+          </li>
+        {% empty %}
+          <li class="list-group-item bg-dark text-warning">No hay usuarios recientes.</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+  <hr class="my-4 border-danger"/>
+  <div class="card bg-dark border-info shadow-sm">
+    <div class="card-header bg-info text-white">Cursos Recientes</div>
+    <div class="card-body">
+      <ul class="list-group list-group-flush">
+        {% for course in recent_courses %}
+          <li class="list-group-item bg-dark text-light">
+            <i class="fas fa-book"></i> {{ course.name }}
+          </li>
+        {% empty %}
+          <li class="list-group-item bg-dark text-warning">No hay cursos recientes.</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+</div>
+{% endblock %}

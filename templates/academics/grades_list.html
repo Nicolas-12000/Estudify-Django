@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}Calificaciones{% endblock %}
+{% block content %}
+<h2 class="mb-4 text-accent"><i class="fas fa-star"></i> Calificaciones</h2>
+
+{% if user.is_teacher %}
+<div class="mb-3 text-end">
+    <a href="{% url 'academics:import_grades' %}" class="btn btn-success">
+        <i class="fas fa-file-upload"></i> Importar Notas Excel
+    </a>
+    <a href="{% url 'academics:grades_create' %}" class="btn btn-primary">
+        <i class="fas fa-plus"></i> Nueva Nota
+    </a>
+</div>
+{% endif %}
+
+<div class="card bg-dark shadow border-secondary">
+    <div class="card-header bg-danger text-white">
+        <i class="fas fa-list-ol"></i> Lista de Calificaciones
+    </div>
+    <div class="card-body">
+        <table class="table table-dark table-striped table-hover align-middle">
+            <thead>
+                <tr>
+                    <th>Estudiante</th>
+                    <th>Materia</th>
+                    <th>Valor</th>
+                    <th>Tipo</th>
+                    <th>Peso</th>
+                    <th>Letra</th>
+                    <th>Docente</th>
+                    <th>Fecha</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for grade in grades %}
+                <tr>
+                    <td>{{ grade.student.get_full_name }}</td>
+                    <td>{{ grade.subject.name }}</td>
+                    <td>{{ grade.value }}</td>
+                    <td>{{ grade.get_grade_type_display }}</td>
+                    <td>{{ grade.weight }}%</td>
+                    <td class="fw-bold">{{ grade.letter_grade }}</td>
+                    <td>{{ grade.graded_by.get_full_name|default:grade.graded_by }}</td>
+                    <td>{{ grade.graded_date }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="8" class="text-center text-warning">No hay calificaciones registradas.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

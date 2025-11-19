@@ -3,10 +3,12 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 from apps.core.models import AbstractBaseModel
-from apps.core.validators import (validate_alphanumeric_with_spaces,
-                                  validate_name_field, validate_text_field,
-                                  validate_username_field)
-
+from apps.core.validators import (
+    validate_alphanumeric_with_spaces,
+    validate_name_field,
+    validate_text_field,
+    validate_username_field
+)
 
 class User(AbstractUser):
     """
@@ -32,16 +34,6 @@ class User(AbstractUser):
         null=True,
         help_text=_('Número de teléfono de contacto')
     )
-
-    def clean(self):
-        """Validación personalizada de campos."""
-        super().clean()
-        if self.first_name:
-            validate_name_field(self.first_name)
-        if self.last_name:
-            validate_name_field(self.last_name)
-        if self.username:
-            validate_username_field(self.username)
     avatar = models.ImageField(
         _('Avatar'),
         upload_to='avatars/',
@@ -105,6 +97,15 @@ class User(AbstractUser):
         """Verifica si el usuario es administrador."""
         return self.role == self.UserRole.ADMIN
 
+    def clean(self):
+        """Validación personalizada de campos."""
+        super().clean()
+        if self.first_name:
+            validate_name_field(self.first_name)
+        if self.last_name:
+            validate_name_field(self.last_name)
+        if self.username:
+            validate_username_field(self.username)
 
 class Profile(AbstractBaseModel):
     """
@@ -140,6 +141,13 @@ class Profile(AbstractBaseModel):
         help_text=_('País de residencia')
     )
 
+    class Meta:
+        verbose_name = _('Perfil')
+        verbose_name_plural = _('Perfiles')
+
+    def __str__(self):
+        return f"Perfil de {self.user.get_full_name()}"
+
     def clean(self):
         """Validación personalizada de campos."""
         super().clean()
@@ -151,13 +159,5 @@ class Profile(AbstractBaseModel):
             validate_alphanumeric_with_spaces(self.city)
         if self.country:
             validate_alphanumeric_with_spaces(self.country)
-
-    class Meta:
-        verbose_name = _('Perfil')
-        verbose_name_plural = _('Perfiles')
-
-    def __str__(self):
-        return f"Perfil de {self.user.get_full_name()}"
-
 
 __all__ = ['User', 'Profile']

@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Panel Estudiante{% endblock %}
+{% block content %}
+<div class="container py-5">
+  <h1 class="text-primary mb-4">
+    <i class="fas fa-user-graduate"></i> ¡Bienvenido, {{ user.first_name }}!
+  </h1>
+  <div class="alert alert-primary mb-4">
+    Accede a tus cursos, calificaciones y asistencia aquí.
+  </div>
+
+  <div class="row g-4 mb-4">
+    <div class="col-md-6">
+      <div class="card bg-dark border-success text-center shadow h-100">
+        <div class="p-3">
+          <i class="fas fa-book fa-2x text-success mb-2"></i>
+          <h4>Cursos inscritos</h4>
+          <p class="fs-5">{{ courses_count|default:"—" }}</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="card bg-dark border-warning text-center shadow h-100">
+        <div class="p-3">
+          <i class="fas fa-star fa-2x text-warning mb-2"></i>
+          <h4>Calificaciones recientes</h4>
+          <p class="fs-5">{{ grades_summary|default:"—" }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card shadow bg-dark border-secondary mt-4">
+    <div class="card-header text-white bg-secondary fw-bold">
+      <i class="fas fa-list-ol"></i> Tus Cursos
+    </div>
+    <div class="card-body">
+      {% if courses %}
+        <ul class="list-group list-group-flush">
+          {% for c in courses %}
+            <li class="list-group-item bg-dark text-white">
+              <i class="fas fa-book"></i> {{ c.name }}
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="text-muted">No estás inscrito a cursos aún.</p>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Resultado de Importación de Notas{% endblock %}
+{% block content %}
+<h2 class="mb-4"><i class="fas fa-clipboard-check"></i> Resultado de Importación</h2>
+{% if success_count %}
+<div class="alert alert-success">
+    <b>{{ success_count }}</b> calificación(es) cargada(s) exitosamente.
+</div>
+{% else %}
+<div class="alert alert-warning">No se cargaron notas nuevas.</div>
+{% endif %}
+
+{% if errors %}
+<div class="alert alert-danger">
+    <b>Errores:</b>
+    <ul>
+        {% for err in errors %}
+            <li>{{ err }}</li>
+        {% endfor %}
+    </ul>
+    <p>Revisa tu archivo y vuelve a intentarlo si es necesario.</p>
+</div>
+{% endif %}
+<a href="{% url 'academics:grades_list' %}" class="btn btn-outline-light">
+    <i class="fas fa-arrow-left"></i> Volver a calificaciones
+</a>
+{% endblock %}

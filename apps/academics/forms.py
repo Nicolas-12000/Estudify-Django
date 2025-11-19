@@ -174,6 +174,8 @@ class BulkAttendanceForm(forms.Form):
             )
 
 
+# ... (todo tu código anterior queda igual)
+
 class GradeFilterForm(forms.Form):
     """
     Formulario para filtrar calificaciones en reportes.
@@ -200,13 +202,21 @@ class GradeFilterForm(forms.Form):
         label='Estudiante'
     )
     grade_type = forms.ChoiceField(
-        choices=[
-            ('',
-             'Todos')] +
-        list(
-            Grade._meta.get_field('grade_type').choices),
+        choices=[('', 'Todos')] + list(Grade._meta.get_field('grade_type').choices),
         required=False,
-        widget=forms.Select(
-            attrs={
-                'class': 'form-control'}),
-        label='Tipo')
+        widget=forms.Select(attrs={'class': 'form-control'}),
+        label='Tipo'
+    )
+
+class GradeImportForm(forms.Form):
+    student = forms.ModelChoiceField(
+        queryset=User.objects.filter(role=User.UserRole.STUDENT, is_active=True),
+        required=True,
+        label='Estudiante',
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
+    file = forms.FileField(
+        label='Archivo de notas (Excel .xlsx)',
+        required=True,
+        widget=forms.FileInput(attrs={'class': 'form-control'})
+    )

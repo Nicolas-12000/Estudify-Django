@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}{% if is_edit %}Editar{% else %}Nuevo{% endif %} Curso{% endblock %}
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card bg-dark border-success shadow">
+                <div class="card-header bg-success text-white">
+                    <h4>{% if is_edit %}<i class="fas fa-edit"></i> Editar Curso{% else %}<i class="fas fa-plus"></i> Nuevo Curso{% endif %}</h4>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        {% for field in form %}
+                        <div class="mb-3">
+                            <label class="form-label">{{ field.label }}</label>
+                            {{ field }}
+                            {% if field.help_text %}
+                            <small class="form-text text-secondary">{{ field.help_text }}</small>
+                            {% endif %}
+                            {% for error in field.errors %}
+                            <div class="text-danger">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                        {% endfor %}
+                        {% if form.non_field_errors %}
+                        <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+                        {% endif %}
+                        <div class="mt-4 d-flex justify-content-between">
+                            <button type="submit" class="btn btn-success px-4">
+                                <i class="fas fa-save"></i> Guardar
+                            </button>
+                            <a href="{% url 'courses:course_list' %}" class="btn btn-outline-light">
+                                <i class="fas fa-arrow-left"></i> Volver
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

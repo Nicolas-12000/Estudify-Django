@@ -1,9 +1,9 @@
-"""
-URLs para la aplicación de reportes.
-"""
+from django.urls import path
+from . import views
 
 app_name = 'reports'
 
 urlpatterns = [
-    # Placeholder - el frontend implementará las vistas
+    path('', views.report_list, name='report_list'),
+    # Puedes agregar más rutas después para PDFs, Excel, etc.
 ]

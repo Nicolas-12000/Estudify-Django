@@ -1,67 +1,42 @@
-"""
-URL configuration for config project.
-
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/5.2/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  path('', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.urls import include, path
-    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
-"""
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
-from drf_spectacular.views import (SpectacularAPIView, SpectacularRedocView,
-                                   SpectacularSwaggerView)
+from drf_spectacular.views import (
+    SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
+)
 
 urlpatterns = [
-    # Admin
+    # Admin Django
     path('admin/', admin.site.urls),
 
-    # Panel de Administración (custom)
+    # Panel admin propio (si tienes un urls_admin.py dentro de apps.core)
+    # Si no existe, puedes quitar esta línea.
     path('panel/', include('apps.core.urls_admin')),
 
-    # API Documentation (Swagger/OpenAPI)
+    # Documentación API
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
-    path(
-        'api/docs/',
-        SpectacularSwaggerView.as_view(
-            url_name='schema'),
-        name='swagger-ui'),
-    path(
-        'api/redoc/',
-        SpectacularRedocView.as_view(
-            url_name='schema'),
-        name='redoc'),
+    path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
+    path('api/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
 
     # API REST
     path('api/', include('apps.api.urls')),
 
-    # Apps
-    path('accounts/', include('apps.users.urls')),
-    path('courses/', include('apps.courses.urls')),
-    path('academics/', include('apps.academics.urls')),
-    path('reports/', include('apps.reports.urls')),
+    # Apps principales
+    path('accounts/', include('apps.users.urls')),           # Usuarios (login, registro, perfiles)
+    path('courses/', include('apps.courses.urls')),          # Cursos
+    path('academics/', include('apps.academics.urls')),      # Académicos
+    path('reports/', include('apps.reports.urls')),          # Reportes
 
-    # Home
-    path('', include('apps.core.urls')),
+    # Dashboard web principal y paneles personalizados
+    path('', include('apps.core.urls')),                     # Panel admin, profesor, estudiante y home
 ]
 
-# Servir archivos media y static en desarrollo
 if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL,
-                          document_root=settings.MEDIA_ROOT)
-    urlpatterns += static(settings.STATIC_URL,
-                          document_root=settings.STATIC_ROOT)
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
-# Personalizar títulos del admin
+# Personalización títulos del panel de administración Django
 admin.site.site_header = 'Estudify - Administración'
 admin.site.site_title = 'Estudify Admin'
 admin.site.index_title = 'Panel de Administración'

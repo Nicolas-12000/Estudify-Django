@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}Panel Administrador{% endblock %}
+{% block content %}
+<div class="container py-5">
+  <h1 class="text-danger mb-4">
+    <i class="fas fa-tools"></i> Panel Administrador
+  </h1>
+  <div class="alert alert-info mb-4">
+    <b>Bienvenido, {{ user.get_full_name }} (Admin)</b> <br>
+    Tienes acceso a la gestión completa del sistema.
+  </div>
+
+  <div class="row g-4 mb-4">
+    <div class="col-md-4">
+      <div class="card bg-dark border-danger text-center shadow h-100">
+        <div class="p-3">
+          <i class="fas fa-users fa-2x text-danger mb-2"></i>
+          <h4>Usuarios Totales</h4>
+          <p class="fs-4">{{ total_users|default:"—" }}</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card bg-dark border-success text-center shadow h-100">
+        <div class="p-3">
+          <i class="fas fa-chalkboard-teacher fa-2x text-success mb-2"></i>
+          <h4>Profesores</h4>
+          <p class="fs-4">{{ total_teachers|default:"—" }}</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card bg-dark border-primary text-center shadow h-100">
+        <div class="p-3">
+          <i class="fas fa-user-graduate fa-2x text-primary mb-2"></i>
+          <h4>Estudiantes</h4>
+          <p class="fs-4">{{ total_students|default:"—" }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="d-flex justify-content-end mb-3">
+    <a href="{% url 'users:register' %}" class="btn btn-primary btn-lg px-4">
+      <i class="fas fa-user-plus"></i> Registrar usuario
+    </a>
+  </div>
+
+  <div class="card shadow bg-dark border-secondary mt-4">
+    <div class="card-header text-white bg-secondary fw-bold">
+      <i class="fas fa-clock"></i> Usuarios Recientes
+    </div>
+    <div class="card-body">
+      {% if recent_users %}
+        <ul class="list-group list-group-flush">
+          {% for u in recent_users %}
+            <li class="list-group-item bg-dark text-white">
+              <i class="fas fa-user"></i> {{ u.username }} - {{ u.get_full_name }}
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="text-muted">No hay usuarios recientes.</p>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}
