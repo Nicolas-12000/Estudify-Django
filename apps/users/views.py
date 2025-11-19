@@ -12,8 +12,8 @@ def is_admin(user):
 
 # ---------- HOME VIEW (página principal genérica) ----------
 def home(request):
-    """Renderiza el home general (HOME.html)."""
-    return render(request, "HOME.html", {})
+    """Renderiza el home general (home.html)."""
+    return render(request, "home.html", {})
 
 # ---------- PANEL ADMINISTRADOR (redirigido desde login si es staff/admin/superuser) ----------
 @login_required

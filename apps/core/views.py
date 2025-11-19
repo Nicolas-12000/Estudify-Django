@@ -3,9 +3,9 @@ from django.contrib.auth.decorators import login_required
 
 def home(request):
     """
-    Renderiza la página principal usando la plantilla base (HOME.html).
+    Renderiza la página principal usando la plantilla base (home.html).
     """
-    return render(request, "HOME.html", {})
+    return render(request, "home.html", {})
 
 @login_required
 def panel_admin(request):
