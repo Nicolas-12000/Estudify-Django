@@ -5,7 +5,6 @@ como Render (usar `DATABASE_URL`, `CELERY_BROKER_URL`, etc. en el entorno).
 """
 
 from pathlib import Path
-
 from decouple import Csv, config
 
 # Build paths
@@ -16,8 +15,9 @@ SECRET_KEY = config('SECRET_KEY', default='django-insecure-dev-key-change-me')
 DEBUG = config('DEBUG', default=True, cast=bool)
 ALLOWED_HOSTS = config(
     'ALLOWED_HOSTS',
-    default='localhost,127.0.0.1',
-    cast=Csv())
+    default='localhost,127.0.0.1,estudify-django.onrender.com',
+    cast=Csv()
+)
 
 # Application definition
 INSTALLED_APPS = [
@@ -104,8 +104,6 @@ if DATABASES['default']['ENGINE'] == 'django.db.backends.sqlite3':
 
 DATABASE_URL = config('DATABASE_URL', default='')
 if DATABASE_URL:
-    # simple parsing: allow postgres URL like
-    # postgres://user:pass@host:port/dbname
     import dj_database_url
     DATABASES['default'] = dj_database_url.parse(
         DATABASE_URL, conn_max_age=600)
