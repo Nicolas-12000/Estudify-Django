@@ -410,6 +410,9 @@ pre-commit install
 ## 👥 Autores
 
 - **Nicolás García** - *Desarrollo inicial* - [Nicolas-12000](https://github.com/Nicolas-12000)
+- **JesusVillota** - *Desarrollo Fronted* - [Jesusdavid2004](https://github.com/Jesusdavid2004)
+- **Camila Bastidasa** - *Desarrollo Backend* - [ghosstbabby12](https://github.com/ghosstbabby12)
+- **Evelin Pulsara** - *Desarrollo Fronted* - [evelinpulsara](https://github.com/evelinpulsara)
 
 ## 🙏 Agradecimientos
 
