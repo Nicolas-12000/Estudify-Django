@@ -74,6 +74,13 @@ class UserRegistrationForm(UserCreationForm):
             raise forms.ValidationError('Este email ya está registrado.')
         return email
 
+    def clean_username(self):
+        """Validar que el username sea único."""
+        username = self.cleaned_data.get('username')
+        if username and User.objects.filter(username__iexact=username).exists():
+            raise forms.ValidationError('Este nombre de usuario ya está en uso.')
+        return username
+
 class UserLoginForm(AuthenticationForm):
     """
     Formulario de inicio de sesión.

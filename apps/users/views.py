@@ -7,6 +7,7 @@ from apps.users.models import User, Profile
 from apps.courses.models import Subject
 from django.db.models import Q
 from django.core.exceptions import PermissionDenied
+from django.db import IntegrityError
 
 def is_admin(user):
     return user.is_authenticated and (getattr(user, "is_admin_role", False) or user.is_staff)
@@ -82,9 +83,14 @@ def register_view(request):
     if request.method == 'POST':
         form = UserRegistrationForm(request.POST)
         if form.is_valid():
-            user = form.save()
-            messages.success(request, "Usuario registrado correctamente.")
-            return redirect('users:user_list')
+            try:
+                user = form.save()
+            except IntegrityError as e:
+                # handle rare race/constraint issues gracefully
+                form.add_error('username', 'Este nombre de usuario ya está en uso.')
+            else:
+                messages.success(request, "Usuario registrado correctamente.")
+                return redirect('users:user_list')
     else:
         form = UserRegistrationForm()
     return render(request, 'users/register.html', {'form': form})
