@@ -32,5 +32,6 @@ def send_welcome_email_on_registration(sender, instance, created, **kwargs):
                 return
             from apps.notifications.tasks import send_welcome_email
             send_welcome_email.delay(instance.id)
+            send_welcome_email.delay(instance.id)
         except Exception:
             pass
