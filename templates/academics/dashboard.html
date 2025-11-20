@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>Dashboard Académico</h1>
+
+<div class="row mb-4">
+  <div class="col-md-6">
+    <label>Materia</label>
+    <select id="subjectSelect" class="form-select">
+      <option value="">(Todas)</option>
+      {% for s in subjects %}
+      <option value="{{ s.id }}">{{ s.name }} ({{ s.course.name }})</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="col-md-6">
+    <label>Curso</label>
+    <select id="courseSelect" class="form-select">
+      <option value="">(Todos)</option>
+      {% for c in courses %}
+      <option value="{{ c.id }}">{{ c.name }} ({{ c.academic_year }}-{{ c.semester }})</option>
+      {% endfor %}
+    </select>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-md-6">
+    <h3>Promedio de Calificaciones</h3>
+    <canvas id="gradesAvgChart"></canvas>
+  </div>
+  <div class="col-md-6">
+    <h3>Asistencia Mensual</h3>
+    <div class="d-flex mb-2">
+      <select id="courseSelectAttendance" class="form-select me-2">
+        {% for c in courses %}
+        <option value="{{ c.id }}">{{ c.name }} ({{ c.academic_year }}-{{ c.semester }})</option>
+        {% endfor %}
+      </select>
+      <input id="yearInput" type="number" class="form-control" placeholder="Año" value="{{ now|date:'Y' }}"/>
+    </div>
+    <canvas id="attendanceMonthlyChart"></canvas>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+async function fetchJSON(url) { const r = await fetch(url); return await r.json(); }
+
+async function renderGradesAvg() {
+  const subject = document.getElementById('subjectSelect').value;
+  const course = document.getElementById('courseSelect').value;
+  const params = new URLSearchParams();
+  if (subject) params.append('subject', subject);
+  if (course) params.append('course', course);
+  const data = await fetchJSON('{% url "academics:api_grades_average" %}?'+params.toString());
+
+  const ctx = document.getElementById('gradesAvgChart').getContext('2d');
+  if (window._gradesChart) window._gradesChart.destroy();
+  window._gradesChart = new Chart(ctx, {
+    type: 'bar',
+    data,
+    options: { scales: { y: { beginAtZero: true, max: 5 } } }
+  });
+}
+
+async function renderAttendanceMonthly() {
+  const course = document.getElementById('courseSelectAttendance').value;
+  const year = document.getElementById('yearInput').value;
+  const params = new URLSearchParams({ course });
+  if (year) params.append('year', year);
+  const data = await fetchJSON('{% url "academics:api_attendance_monthly" %}?'+params.toString());
+
+  const ctx = document.getElementById('attendanceMonthlyChart').getContext('2d');
+  if (window._attendanceChart) window._attendanceChart.destroy();
+  window._attendanceChart = new Chart(ctx, {
+    type: 'bar',
+    data,
+    options: { scales: { y: { beginAtZero: true } }, responsive: true }
+  });
+}
+
+document.getElementById('subjectSelect').addEventListener('change', renderGradesAvg);
+document.getElementById('courseSelect').addEventListener('change', renderGradesAvg);
+document.getElementById('courseSelectAttendance').addEventListener('change', renderAttendanceMonthly);
+document.getElementById('yearInput').addEventListener('change', renderAttendanceMonthly);
+
+// Inicializar
+renderGradesAvg();
+renderAttendanceMonthly();
+</script>
+{% endblock %}

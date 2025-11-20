@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>Materias</h1>
+<a href="{% url 'courses:subject_create' %}" class="btn btn-primary mb-3">Nueva materia</a>
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>Nombre</th>
+      <th>Código</th>
+      <th>Curso</th>
+      <th>Docente</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for s in subjects %}
+    <tr>
+      <td><a href="{% url 'courses:subject_detail' s.pk %}">{{ s.name }}</a></td>
+      <td>{{ s.code }}</td>
+      <td>{{ s.course.name }}</td>
+      <td>{{ s.teacher }}</td>
+      <td>
+        <a href="{% url 'courses:subject_edit' s.pk %}" class="btn btn-sm btn-secondary">Editar</a>
+        <a href="{% url 'courses:subject_delete' s.pk %}" class="btn btn-sm btn-danger">Eliminar</a>
+      </td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="5">No hay materias</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

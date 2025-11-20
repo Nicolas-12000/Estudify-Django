@@ -1,6 +1,10 @@
-{% extends "base.html" %}
-{% block title %}Nueva Calificación{% endblock %}
+{% extends 'base.html' %}
 {% block content %}
-<h2>Nueva Calificación</h2>
-<p>Aquí irá el formulario para crear una nueva nota.</p>
+<h1>Nueva calificación</h1>
+<form method="post">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <button class="btn btn-primary" type="submit">Guardar</button>
+  <a class="btn btn-secondary" href="{% url 'academics:grades_list' %}">Cancelar</a>
+</form>
 {% endblock %}

@@ -1,28 +1,9 @@
-{% extends "base.html" %}
-{% block title %}Detalle de Curso{% endblock %}
+{% extends 'base.html' %}
 {% block content %}
-<div class="container py-4">
-    <div class="card bg-dark border-primary shadow">
-        <div class="card-header bg-primary text-white">
-            <h3>{{ course.name }}</h3>
-        </div>
-        <div class="card-body">
-            <p><b>Código:</b> {{ course.code }}</p>
-            <p><b>Descripción:</b> {{ course.description|default:"(Sin descripción)" }}</p>
-            <p><b>Docente:</b> {{ course.teacher.get_full_name }}</p>
-            <p><b>Año académico:</b> {{ course.academic_year }}</p>
-            <p><b>Semestre:</b> {{ course.semester }}</p>
-            <p><b>Capacidad máxima:</b> {{ course.max_students }}</p>
-            <p><b>Estado:</b>
-                {% if course.is_active %}
-                    <span class="badge bg-success">Activo</span>
-                {% else %}
-                    <span class="badge bg-danger">Inactivo</span>
-                {% endif %}
-            </p>
-            <a href="{% url 'courses:course_list' %}" class="btn btn-outline-light"><i class="fas fa-arrow-left"></i> Volver</a>
-            <a href="{% url 'courses:course_edit' course.pk %}" class="btn btn-warning"><i class="fas fa-edit"></i> Editar</a>
-        </div>
-    </div>
-</div>
+<h1>{{ course.name }} ({{ course.academic_year }}-{{ course.semester }})</h1>
+<p><strong>Código:</strong> {{ course.code }}</p>
+<p><strong>Docente:</strong> {{ course.teacher }}</p>
+<p>{{ course.description }}</p>
+<a href="{% url 'courses:course_edit' course.pk %}" class="btn btn-secondary">Editar</a>
+<a href="{% url 'courses:course_delete' course.pk %}" class="btn btn-danger">Eliminar</a>
 {% endblock %}

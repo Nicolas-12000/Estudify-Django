@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>Eliminar materia</h1>
+<p>¿Seguro que deseas eliminar la materia "{{ subject.name }}"?</p>
+<form method="post">
+  {% csrf_token %}
+  <button type="submit" class="btn btn-danger">Eliminar</button>
+  <a href="{% url 'courses:subject_detail' subject.pk %}" class="btn btn-secondary">Cancelar</a>
+</form>
+{% endblock %}

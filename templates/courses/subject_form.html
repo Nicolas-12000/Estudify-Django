@@ -1,10 +1,10 @@
 {% extends 'base.html' %}
 {% block content %}
-<h1>{% if is_edit %}Editar curso: {{ course.name }}{% else %}Nuevo curso{% endif %}</h1>
+<h1>{% if is_edit %}Editar materia: {{ subject.name }}{% else %}Nueva materia{% endif %}</h1>
 <form method="post">
   {% csrf_token %}
   {{ form.as_p }}
   <button class="btn btn-primary" type="submit">Guardar</button>
-  <a class="btn btn-secondary" href="{% url 'courses:course_list' %}">Cancelar</a>
+  <a class="btn btn-secondary" href="{% url 'courses:subject_list' %}">Cancelar</a>
 </form>
 {% endblock %}

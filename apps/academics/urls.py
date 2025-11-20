@@ -4,12 +4,19 @@ from . import views
 app_name = 'academics'
 
 urlpatterns = [
-    path('asistencias/nueva/', views.attendance_create, name='attendance_create'), 
-    path('asistencias/', views.attendance_list, name='attendance_list'),
+    # Calificaciones
     path('calificaciones/', views.grades_list, name='grades_list'),
-    path('asistencias/', views.attendance_list, name='attendance_list'),
-    path('importar/', views.import_grades, name='import_grades'),  # <---- AGREGA ESTA LÍNEA
-    path('nueva/', views.grade_create, name='grades_create'),
+    path('calificaciones/nueva/', views.grade_create, name='grade_create'),
 
-    # Puedes agregar aquí más rutas
+    # Asistencias
+    path('asistencias/', views.attendance_list, name='attendance_list'),
+    path('asistencias/nueva/', views.attendance_create, name='attendance_create'), 
+
+    # Dashboard
+    path('dashboard/', views.dashboard_view, name='dashboard'),
+    path('dashboard/api/grades/average/', views.api_grades_average, name='api_grades_average'),
+    path('dashboard/api/attendance/monthly/', views.api_attendance_monthly, name='api_attendance_monthly'),
+
+    # Importación
+    path('importar/', views.import_grades, name='import_grades'),
 ]

@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>{{ subject.name }}</h1>
+<p><strong>Código:</strong> {{ subject.code }}</p>
+<p><strong>Curso:</strong> {{ subject.course.name }}</p>
+<p><strong>Docente:</strong> {{ subject.teacher }}</p>
+<p>{{ subject.description }}</p>
+<a href="{% url 'courses:subject_edit' subject.pk %}" class="btn btn-secondary">Editar</a>
+<a href="{% url 'courses:subject_delete' subject.pk %}" class="btn btn-danger">Eliminar</a>
+{% endblock %}

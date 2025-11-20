@@ -1,8 +1,9 @@
-{% extends "base.html" %}
-{% block title %}Reportes - Estudify{% endblock %}
+{% extends 'base.html' %}
 {% block content %}
-<h2 class="mb-4 text-accent"><i class="fas fa-file-alt"></i> Reportes y Boletines</h2>
-<div class="alert alert-info">
-  Aquí irán los reportes descargables (PDF/Excel) y las estadísticas del sistema muy pronto.
-</div>
+<h1>Reportes</h1>
+<ul>
+  <li>Boletín por estudiante: /reports/boletin/&lt;student_id&gt;/</li>
+  <li>Acta por curso: /reports/acta/&lt;course_id&gt;/</li>
+  <li>Acta por curso y materia: /reports/acta/&lt;course_id&gt;/materia/&lt;subject_id&gt;/</li>
+</ul>
 {% endblock %}

@@ -12,8 +12,18 @@ def is_admin(user):
 
 # ---------- HOME VIEW (página principal genérica) ----------
 def home(request):
-    """Renderiza el home general (HOME.html)."""
-    return render(request, "HOME.html", {})
+    """Renderiza el home general (HOME.html) con formulario de login embebido.
+
+    Pasamos una instancia de `UserLoginForm` y el parámetro `next` (si existe)
+    para que la plantilla pueda centralizar el inicio de sesión y preservar
+    parámetros GET existentes al redirigir.
+    """
+    form = UserLoginForm(request)
+    next_param = request.GET.get('next', '')
+    return render(request, "HOME.html", {
+        'form': form,
+        'next_param': next_param,
+    })
 
 # ---------- PANEL ADMINISTRADOR (redirigido desde login si es staff/admin/superuser) ----------
 @login_required
@@ -53,21 +63,27 @@ def panel_estudiante(request):
         'grades_summary': grades_summary,
     })
 
-@user_passes_test(is_admin)
 def register_view(request):
     """
-    Vista para registrar cualquier usuario (solo admin/staff).
-    El perfil se crea automáticamente por la señal.
+    Vista pública para registrar nuevos usuarios desde la landing.
+    Campos: nombre, correo, contraseña, confirmar contraseña y rol (docente/estudiante).
+    Genera un username automático y crea el perfil.
     """
+    from apps.users.forms import PublicUserRegistrationForm
+
     if request.method == 'POST':
-        form = UserRegistrationForm(request.POST)
+        form = PublicUserRegistrationForm(request.POST)
         if form.is_valid():
             user = form.save()
-            # El perfil ya se crea automático por la signal
-            messages.success(request, "Usuario registrado correctamente.")
-            return redirect('users:user_list')
+            # Crear perfil por si las señales no lo manejan inmediatamente
+            try:
+                Profile.objects.get_or_create(user=user)
+            except Exception:
+                pass
+            messages.success(request, "Registro completado. Puedes iniciar sesión ahora.")
+            return redirect('users:login')
     else:
-        form = UserRegistrationForm()
+        form = PublicUserRegistrationForm()
     return render(request, 'users/register.html', {'form': form})
 
 # ----------- LOGIN CON REDIRECCIÓN A PANEL SEGÚN ROL -----------

@@ -74,6 +74,72 @@ class UserRegistrationForm(UserCreationForm):
             raise forms.ValidationError('Este email ya está registrado.')
         return email
 
+
+class PublicUserRegistrationForm(UserCreationForm):
+    """
+    Formulario público para registro desde la landing.
+    Campos: nombre (first_name), email, password1, password2 y role (docente/estudiante).
+    Genera automáticamente un `username` a partir del email si no se proporciona.
+    """
+    email = forms.EmailField(
+        required=True,
+        widget=forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Correo'})
+    )
+    first_name = forms.CharField(
+        required=True,
+        max_length=150,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nombre'})
+    )
+    # Limitamos las opciones de rol para registro público (no permitir ADMIN)
+    role = forms.ChoiceField(
+        choices=[(User.UserRole.TEACHER, User.UserRole.TEACHER.label),
+                 (User.UserRole.STUDENT, User.UserRole.STUDENT.label)],
+        widget=forms.Select(attrs={'class': 'form-control'}),
+        label="Rol"
+    )
+
+    class Meta:
+        model = User
+        fields = ['email', 'first_name', 'role', 'password1', 'password2']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # password widgets
+        self.fields['password1'].widget.attrs.update({'class': 'form-control', 'placeholder': 'Contraseña'})
+        self.fields['password2'].widget.attrs.update({'class': 'form-control', 'placeholder': 'Confirmar contraseña'})
+
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        if User.objects.filter(email__iexact=email).exists():
+            raise forms.ValidationError('Este correo ya está registrado.')
+        return email
+
+    def _generate_unique_username(self, base):
+        """Genera un username único a partir de base."""
+        username = base
+        suffix = 0
+        while User.objects.filter(username=username).exists():
+            suffix += 1
+            username = f"{base}{suffix}"
+        return username
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        # generar username a partir del email
+        email = self.cleaned_data.get('email')
+        local = email.split('@')[0]
+        # normalizar y permitir solo caracteres válidos
+        base = local.replace('.', '').replace('-', '').lower()
+        base = base[:30] if len(base) > 30 else base
+        user.username = self._generate_unique_username(base)
+        user.first_name = self.cleaned_data.get('first_name', '')
+        # last_name se deja vacío por defecto
+        user.email = email
+        user.role = self.cleaned_data.get('role', User.UserRole.STUDENT)
+        if commit:
+            user.save()
+        return user
+
 class UserLoginForm(AuthenticationForm):
     """
     Formulario de inicio de sesión.

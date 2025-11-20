@@ -1,104 +1,277 @@
-{% extends "base.html" %}
-{% block title %}Inicio - Estudify{% endblock %}
-{% block content %}
-<div class="container py-5">
-  <div class="row mb-4">
-    <div class="col-md-12 text-center">
-      <h1 class="display-4 mb-2 text-danger fw-bold fade-in">
-        <i class="fas fa-graduation-cap"></i> ¡Bienvenido a Estudify!
-      </h1>
-      <p class="lead text-secondary">La plataforma integral para tu gestión académica</p>
-      <div class="alert alert-info mx-auto shadow-sm fade-in" style="font-size:1.1rem; max-width:490px">
-        <i class="fas fa-lightbulb"></i>
-        <b>Consejo:</b> <i>El futuro pertenece a quienes creen en sus sueños.</i>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bienvenido - Estudify</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+    
+    * {
+      font-family: 'Inter', sans-serif;
+    }
+    
+    body {
+      background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+      min-height: 100vh;
+      overflow-x: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1rem;
+    }
+    
+    .login-container {
+      max-width: 550px;
+      width: 100%;
+    }
+    
+    .login-card {
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 20px;
+      padding: 3rem 2.5rem;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(20px);
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    }
+    
+    .login-title {
+      color: white;
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 2rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    
+    .form-label {
+      color: rgba(255, 255, 255, 0.9);
+      font-weight: 500;
+      margin-bottom: 0.5rem;
+      font-size: 1rem;
+    }
+    
+    .form-control {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 1rem 1.25rem;
+      color: white;
+      transition: all 0.3s ease;
+      font-size: 1rem;
+    }
+    
+    .form-control:focus {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: #dc2626;
+      box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+      color: white;
+      outline: none;
+    }
+    
+    .form-control::placeholder {
+      color: rgba(255, 255, 255, 0.4);
+    }
+    
+    .btn-login {
+      background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+      border: none;
+      color: white;
+      padding: 1rem;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 1.1rem;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 20px rgba(220, 38, 38, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+    
+    .btn-login:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(220, 38, 38, 0.5);
+      background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);
+    }
+    
+    .divider {
+      display: flex;
+      align-items: center;
+      text-align: center;
+      color: rgba(255, 255, 255, 0.4);
+      margin: 2rem 0;
+    }
+    
+    .divider::before,
+    .divider::after {
+      content: '';
+      flex: 1;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .divider span {
+      padding: 0 1rem;
+      font-size: 0.875rem;
+    }
+    
+    .btn-create {
+      background: transparent;
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      color: rgba(255, 255, 255, 0.9);
+      padding: 0.875rem 1.75rem;
+      border-radius: 12px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 1rem;
+    }
+    
+    .btn-create:hover {
+      background: rgba(255, 255, 255, 0.05);
+      border-color: rgba(255, 255, 255, 0.4);
+      transform: translateY(-2px);
+      color: white;
+    }
+    
+    .credentials-box {
+      background: rgba(220, 38, 38, 0.05);
+      border: 1px solid rgba(220, 38, 38, 0.2);
+      border-radius: 14px;
+      padding: 1.75rem;
+      margin-top: 2rem;
+    }
+    
+    .credentials-title {
+      color: #dc2626;
+      font-weight: 700;
+      margin-bottom: 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 1.1rem;
+    }
+    
+    .credentials-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    
+    .credentials-item {
+      color: rgba(255, 255, 255, 0.75);
+      margin-bottom: 1rem;
+      padding-left: 1.75rem;
+      position: relative;
+      font-size: 0.95rem;
+      line-height: 1.6;
+    }
+    
+    .credentials-item:last-child {
+      margin-bottom: 0;
+    }
+    
+    .credentials-item::before {
+      content: '→';
+      position: absolute;
+      left: 0;
+      color: #dc2626;
+      font-weight: bold;
+    }
+    
+    .credentials-item strong {
+      color: rgba(255, 255, 255, 0.95);
+      font-weight: 600;
+    }
+    
+    @media (max-width: 576px) {
+      .login-card {
+        padding: 2rem 1.5rem;
+      }
+      
+      .login-title {
+        font-size: 1.75rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <div class="login-card">
+      <h4 class="login-title">
+        <i class="fas fa-sign-in-alt"></i>
+        Acceso Rápido
+      </h4>
+      
+      <form method="post" action="{% url 'users:login' %}{% if request.GET %}?{{ request.GET.urlencode }}{% endif %}">
+        {% csrf_token %}
+        {% if messages %}
+          {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} mb-3">{{ message }}</div>
+          {% endfor %}
+        {% endif %}
+
+        <div class="mb-3">
+          <label class="form-label">Usuario o Email</label>
+          {{ form.username }}
+          {% if form.username.errors %}
+            <div class="text-danger small mt-1">{{ form.username.errors }}</div>
+          {% endif %}
+        </div>
+
+        <div class="mb-4">
+          <label class="form-label">Contraseña</label>
+          {{ form.password }}
+          {% if form.password.errors %}
+            <div class="text-danger small mt-1">{{ form.password.errors }}</div>
+          {% endif %}
+        </div>
+
+        {% if next_param %}
+          <input type="hidden" name="next" value="{{ next_param }}">
+        {% endif %}
+
+        <button type="submit" class="btn btn-login w-100">
+          <i class="fas fa-arrow-right"></i>
+          Iniciar Sesión
+        </button>
+      </form>
+      
+      <div class="divider">
+        <span>o</span>
+      </div>
+      
+      <div class="text-center">
+        <a href="{% url 'users:register' %}{% if request.GET %}?{{ request.GET.urlencode }}{% endif %}" class="btn-create">
+          <i class="fas fa-user-plus"></i>
+          Crear cuenta nueva
+        </a>
+      </div>
+      
+      <div class="credentials-box">
+        <div class="credentials-title">
+          <i class="fas fa-info-circle"></i>
+          Credenciales de Prueba
+        </div>
+        <ul class="credentials-list">
+          <li class="credentials-item">
+            <strong>Administrador:</strong> admin@estudify.com / Admin123!@#
+          </li>
+          <li class="credentials-item">
+            <strong>Profesor:</strong> vanessa.urbano@estudify.com / Teacher123!@#
+          </li>
+          <li class="credentials-item">
+            <strong>Estudiante:</strong> estudiante@estudify.com / Student123!@#
+          </li>
+        </ul>
       </div>
     </div>
   </div>
-  <div class="row gy-4 justify-content-center">
-    <div class="col-12 col-md-6 col-lg-3">
-      <a href="{% url 'users:profile' %}" class="card bg-dark border-danger shadow-lg text-center h-100 pointer hover-lift">
-        <div class="card-body">
-          <i class="fas fa-user-circle fa-3x text-danger mb-2"></i>
-          <h4 class="card-title fw-bold">Mi Perfil</h4>
-          <p class="card-text text-secondary">Actualiza tu información personal.</p>
-        </div>
-      </a>
-    </div>
-    <div class="col-12 col-md-6 col-lg-3">
-      <a href="{% url 'academics:grades_list' %}" class="card bg-dark border-primary shadow-lg text-center h-100 pointer hover-lift">
-        <div class="card-body">
-          <i class="fas fa-list-ol fa-3x text-primary mb-2"></i>
-          <h4 class="card-title fw-bold">Calificaciones</h4>
-          <p class="card-text text-secondary">Consulta y gestiona tus notas.</p>
-        </div>
-      </a>
-    </div>
-    <div class="col-12 col-md-6 col-lg-3">
-      <a href="{% url 'academics:attendance_list' %}" class="card bg-dark border-success shadow-lg text-center h-100 pointer hover-lift">
-        <div class="card-body">
-          <i class="fas fa-calendar-check fa-3x text-success mb-2"></i>
-          <h4 class="card-title fw-bold">Asistencias</h4>
-          <p class="card-text text-secondary">Historial de presencias y ausencias.</p>
-        </div>
-      </a>
-    </div>
-    <div class="col-12 col-md-6 col-lg-3">
-      <a href="{% url 'users:user_list' %}" class="card bg-dark border-info shadow-lg text-center h-100 pointer hover-lift">
-        <div class="card-body">
-          <i class="fas fa-users fa-3x text-info mb-2"></i>
-          <h4 class="card-title fw-bold">Usuarios</h4>
-          <p class="card-text text-secondary">Listado de todos los usuarios.</p>
-        </div>
-      </a>
-    </div>
-  </div>
-  <div class="row gy-4 mt-2 justify-content-center">
-    <div class="col-12 col-md-6 col-lg-3">
-      <a href="{% url 'admin_panel:dashboard' %}" class="card bg-dark border-warning shadow-lg text-center h-100 pointer hover-lift">
-        <div class="card-body">
-          <i class="fas fa-tachometer-alt fa-3x text-warning mb-2"></i>
-          <h4 class="card-title fw-bold">Dashboard Admin</h4>
-          <p class="card-text text-secondary">Panel de control administrativo.</p>
-        </div>
-      </a>
-    </div>
-    <div class="col-12 col-md-6 col-lg-3">
-      <a href="{% url 'reports:report_list' %}" class="card bg-dark border-light shadow-lg text-center h-100 pointer hover-lift">
-        <div class="card-body">
-          <i class="fas fa-file-alt fa-3x text-light mb-2"></i>
-          <h4 class="card-title fw-bold">Reportes</h4>
-          <p class="card-text text-secondary">Informes y estadísticas educativas.</p>
-        </div>
-      </a>
-    </div>
-    <div class="col-12 col-md-6 col-lg-3">
-      <a href="/api/docs/" class="card bg-dark border-secondary shadow-lg text-center h-100 pointer hover-lift">
-        <div class="card-body">
-          <i class="fas fa-book fa-3x text-secondary mb-2"></i>
-          <h4 class="card-title fw-bold">API Docs</h4>
-          <p class="card-text text-secondary">Documentación interactiva de la API.</p>
-        </div>
-      </a>
-    </div>
-    <div class="col-12 col-md-6 col-lg-3">
-      <a href="{% url 'users:logout' %}" class="card bg-dark border-danger shadow-lg text-center h-100 pointer hover-lift">
-        <div class="card-body">
-          <i class="fas fa-sign-out-alt fa-3x text-danger mb-2"></i>
-          <h4 class="card-title fw-bold">Salir</h4>
-          <p class="card-text text-secondary">Cerrar sesión en Estudify.</p>
-        </div>
-      </a>
-    </div>
-  </div>
-  <div class="alert alert-secondary mt-5 py-3 text-center shadow">
-    <i class="fas fa-bullhorn fa-fw"></i>
-    <b>¡Explora el menú!</b> Navega rápido por tu campus virtual y gestiona tu progreso.
-  </div>
-</div>
-<style>
-.fade-in { animation: fadeIn 1.5s; }
-.pointer:hover, .hover-lift:hover { transform: translateY(-4px) scale(1.03); transition: 0.3s; }
-@keyframes fadeIn { from {opacity:0;} to {opacity:1;} }
-.card { transition: all 0.3s; }
-</style>
-{% endblock %}
+</body>
+</html>
