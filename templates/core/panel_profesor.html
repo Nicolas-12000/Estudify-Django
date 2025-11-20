@@ -2,19 +2,18 @@
 {% block title %}Panel Profesor{% endblock %}
 {% block content %}
 <div class="container py-5">
-  <h1 class="text-success mb-4">
+  <h1 class="text-success mb-4 fw-bold">
     <i class="fas fa-chalkboard-teacher"></i> ¡Bienvenido, Profesor {{ user.first_name }}!
   </h1>
-  <div class="alert alert-success mb-4">
+  <div class="alert alert-success mb-4 shadow-sm">
     Acceso a tus materias, estudiantes, recursos y reportes.
   </div>
-
   <div class="row g-4 mb-4">
     <div class="col-md-6">
       <div class="card bg-dark border-info text-center shadow h-100">
         <div class="p-3">
           <i class="fas fa-book-open fa-2x text-info mb-2"></i>
-          <h4>Tus Materias</h4>
+          <h4>Materias a Cargo</h4>
           <p class="fs-5">{{ subjects_count|default:"—" }}</p>
         </div>
       </div>
@@ -29,9 +28,8 @@
       </div>
     </div>
   </div>
-
   <div class="card shadow bg-dark border-secondary mt-4">
-    <div class="card-header text-white bg-secondary fw-bold">
+    <div class="card-header text-white bg-info fw-bold">
       <i class="fas fa-book"></i> Materias Asignadas
     </div>
     <div class="card-body">

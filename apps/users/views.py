@@ -1,23 +1,29 @@
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.decorators import login_required, user_passes_test
+from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
 from apps.users.forms import UserRegistrationForm, UserLoginForm, UserProfileForm
 from apps.users.models import User, Profile
 from apps.courses.models import Subject
 from django.db.models import Q
+from django.core.exceptions import PermissionDenied
 
 def is_admin(user):
-    return user.is_authenticated and (user.is_admin_role or user.is_staff)
+    return user.is_authenticated and (getattr(user, "is_admin_role", False) or user.is_staff)
 
-# ---------- HOME VIEW (página principal genérica) ----------
+def is_teacher(user):
+    return user.is_authenticated and getattr(user, "role", None) == User.UserRole.TEACHER
+
+def is_student(user):
+    return user.is_authenticated and getattr(user, "role", None) == User.UserRole.STUDENT
+
 def home(request):
-    """Renderiza el home general (home.html)."""
     return render(request, "home.html", {})
 
-# ---------- PANEL ADMINISTRADOR (redirigido desde login si es staff/admin/superuser) ----------
 @login_required
 def panel_admin(request):
+    if not is_admin(request.user):
+        raise PermissionDenied
     total_users = User.objects.count()
     total_teachers = User.objects.filter(role=User.UserRole.TEACHER).count()
     total_students = User.objects.filter(role=User.UserRole.STUDENT).count()
@@ -29,9 +35,10 @@ def panel_admin(request):
         'recent_users': recent_users,
     })
 
-# ---------- PANEL PROFESOR ----------
 @login_required
 def panel_profesor(request):
+    if not is_teacher(request.user):
+        raise PermissionDenied
     subjects = Subject.objects.filter(teacher=request.user)
     subjects_count = subjects.count()
     students_count = sum(sub.students.count() for sub in subjects)
@@ -41,10 +48,11 @@ def panel_profesor(request):
         'students_count': students_count,
     })
 
-# ---------- PANEL ESTUDIANTE ----------
 @login_required
 def panel_estudiante(request):
-    courses = getattr(request.user.profile, 'courses', [])  # ajusta si usas FK/M2M
+    if not is_student(request.user):
+        raise PermissionDenied
+    courses = getattr(request.user.profile, 'courses', [])
     courses_count = len(courses) if hasattr(courses, '__len__') else courses.count() if hasattr(courses, 'count') else 0
     grades_summary = "—"
     return render(request, "core/panel_estudiante.html", {
@@ -53,35 +61,28 @@ def panel_estudiante(request):
         'grades_summary': grades_summary,
     })
 
-@user_passes_test(is_admin)
+@login_required
 def register_view(request):
-    """
-    Vista para registrar cualquier usuario (solo admin/staff).
-    El perfil se crea automáticamente por la señal.
-    """
+    if not is_admin(request.user):
+        raise PermissionDenied
     if request.method == 'POST':
         form = UserRegistrationForm(request.POST)
         if form.is_valid():
             user = form.save()
-            # El perfil ya se crea automático por la signal
             messages.success(request, "Usuario registrado correctamente.")
             return redirect('users:user_list')
     else:
         form = UserRegistrationForm()
     return render(request, 'users/register.html', {'form': form})
 
-# ----------- LOGIN CON REDIRECCIÓN A PANEL SEGÚN ROL -----------
 def login_view(request):
-    """
-    Vista para inicio de sesión.
-    """
     if request.user.is_authenticated:
         # Redirige según rol aunque ya haya sesión
-        if request.user.is_admin_role or request.user.is_staff:
+        if is_admin(request.user):
             return redirect('panel_admin')
-        elif request.user.role == User.UserRole.TEACHER:
+        elif is_teacher(request.user):
             return redirect('panel_profesor')
-        elif request.user.role == User.UserRole.STUDENT:
+        elif is_student(request.user):
             return redirect('panel_estudiante')
         else:
             return redirect('home')
@@ -101,35 +102,28 @@ def login_view(request):
             if user is not None:
                 login(request, user)
                 messages.success(request, f'Bienvenido, {user.get_full_name()}!')
-                if user.is_admin_role or user.is_staff:
+                if is_admin(user):
                     return redirect('panel_admin')
-                elif user.role == User.UserRole.TEACHER:
+                elif is_teacher(user):
                     return redirect('panel_profesor')
-                elif user.role == User.UserRole.STUDENT:
+                elif is_student(user):
                     return redirect('panel_estudiante')
-                next_url = request.GET.get('next', 'home')
-                return redirect(next_url)
+                else:
+                    return redirect('home')
     else:
         form = UserLoginForm()
     return render(request, 'users/login.html', {'form': form})
 
 @login_required
 def logout_view(request):
-    """
-    Vista para cerrar sesión.
-    """
     logout(request)
     messages.info(request, 'Has cerrado sesión correctamente.')
     return redirect('users:login')
 
 @login_required
 def profile_view(request):
-    """
-    Ver y editar perfil de usuario.
-    """
     profile, _ = Profile.objects.get_or_create(user=request.user)
-    subjects = Subject.objects.filter(teacher=request.user, is_active=True) if getattr(request.user, 'is_teacher', False) else None
-
+    subjects = Subject.objects.filter(teacher=request.user, is_active=True) if is_teacher(request.user) else None
     if request.method == 'POST':
         form = UserProfileForm(request.POST, request.FILES, instance=profile)
         if form.is_valid():
@@ -138,7 +132,6 @@ def profile_view(request):
             return redirect('users:profile')
     else:
         form = UserProfileForm(instance=profile)
-
     return render(request, 'users/profile.html', {
         'form': form,
         'profile': profile,
@@ -147,17 +140,11 @@ def profile_view(request):
 
 @login_required
 def user_list_view(request):
-    """
-    Vista para listar usuarios (solo admin/staff).
-    """
-    if not request.user.is_admin_role and not request.user.is_staff:
-        messages.error(request, 'No tienes permisos para acceder a esta página.')
-        return redirect('home')
-
+    if not is_admin(request.user):
+        raise PermissionDenied
     users = User.objects.all().order_by('-date_joined')
     role_filter = request.GET.get('role')
     search = request.GET.get('search')
-
     if role_filter:
         users = users.filter(role=role_filter)
     if search:
@@ -167,7 +154,6 @@ def user_list_view(request):
             Q(last_name__icontains=search) |
             Q(email__icontains=search)
         )
-
     return render(request, 'users/user_list.html', {
         'users': users,
         'role_choices': User.UserRole.choices
@@ -175,23 +161,15 @@ def user_list_view(request):
 
 @login_required
 def user_detail_view(request, pk):
-    """
-    Detalle de usuario.
-    """
     user = get_object_or_404(User, pk=pk)
-    if not (request.user.is_admin_role or request.user.is_staff or request.user == user):
-        messages.error(request, 'No tienes permisos para ver este perfil.')
-        return redirect('home')
+    if not (is_admin(request.user) or request.user == user):
+        raise PermissionDenied
     return render(request, 'users/user_detail.html', {'user_obj': user})
 
 @login_required
 def toggle_user_status(request, pk):
-    """
-    Activar/desactivar usuario (solo admin/staff).
-    """
-    if not (request.user.is_admin_role or request.user.is_staff):
-        messages.error(request, 'No tienes permisos para esta acción.')
-        return redirect('home')
+    if not is_admin(request.user):
+        raise PermissionDenied
     user = get_object_or_404(User, pk=pk)
     if user.is_active:
         user.is_active = False

@@ -1,18 +1,34 @@
-"""Compatibility re-exports for API viewsets.
-
-Some places import from `apps.api.views`, while the real implementations
-live under `apps.api.v1.viewsets`. This module re-exports the common
-ViewSet classes so both import styles work.
 """
-from apps.api.v1.viewsets import (AttendanceViewSet, CourseEnrollmentViewSet,
-                                  CourseViewSet, GradeViewSet, SubjectViewSet,
-                                  UserViewSet)
+Compatibility re-exports for API viewsets.
+
+Algunos lugares importan desde `apps.api.views`, mientras que las
+implementaciones reales viven en `apps.api.v1.viewsets`. Este módulo
+re‑exporta las clases ViewSet comunes para que ambos estilos de import
+funcionen sin romper nada.
+
+Ejemplos de uso soportados:
+
+    from apps.api.views import UserViewSet
+    # o
+    from apps.api.v1.viewsets import UserViewSet
+
+Ambos son equivalentes gracias a este archivo.
+"""
+
+from apps.api.v1.viewsets import (
+    AttendanceViewSet,
+    CourseEnrollmentViewSet,
+    CourseViewSet,
+    GradeViewSet,
+    SubjectViewSet,
+    UserViewSet,
+)
 
 __all__ = [
-    'UserViewSet',
-    'CourseViewSet',
-    'SubjectViewSet',
-    'CourseEnrollmentViewSet',
-    'GradeViewSet',
-    'AttendanceViewSet',
+    "UserViewSet",
+    "CourseViewSet",
+    "SubjectViewSet",
+    "CourseEnrollmentViewSet",
+    "GradeViewSet",
+    "AttendanceViewSet",
 ]

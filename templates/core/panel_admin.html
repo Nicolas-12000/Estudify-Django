@@ -2,14 +2,13 @@
 {% block title %}Panel Administrador{% endblock %}
 {% block content %}
 <div class="container py-5">
-  <h1 class="text-danger mb-4">
+  <h1 class="text-danger mb-4 fw-bold">
     <i class="fas fa-tools"></i> Panel Administrador
   </h1>
-  <div class="alert alert-info mb-4">
-    <b>Bienvenido, {{ user.get_full_name }} (Admin)</b> <br>
-    Tienes acceso a la gestión completa del sistema.
+  <div class="alert alert-info mb-4 shadow-sm">
+    <b>Bienvenido, {{ user.get_full_name }} (Admin)</b><br>
+    Tienes acceso total a la gestión académica del sistema.
   </div>
-
   <div class="row g-4 mb-4">
     <div class="col-md-4">
       <div class="card bg-dark border-danger text-center shadow h-100">
@@ -39,13 +38,9 @@
       </div>
     </div>
   </div>
-
   <div class="d-flex justify-content-end mb-3">
-    <a href="{% url 'users:register' %}" class="btn btn-primary btn-lg px-4">
-      <i class="fas fa-user-plus"></i> Registrar usuario
-    </a>
+    <a href="{% url 'users:register' %}" class="btn btn-danger btn-lg px-4 shadow-sm"><i class="fas fa-user-plus"></i> Registrar usuario</a>
   </div>
-
   <div class="card shadow bg-dark border-secondary mt-4">
     <div class="card-header text-white bg-secondary fw-bold">
       <i class="fas fa-clock"></i> Usuarios Recientes

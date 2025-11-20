@@ -2,13 +2,12 @@
 {% block title %}Panel Estudiante{% endblock %}
 {% block content %}
 <div class="container py-5">
-  <h1 class="text-primary mb-4">
+  <h1 class="text-primary mb-4 fw-bold">
     <i class="fas fa-user-graduate"></i> ¡Bienvenido, {{ user.first_name }}!
   </h1>
-  <div class="alert alert-primary mb-4">
+  <div class="alert alert-primary mb-4 shadow-sm">
     Accede a tus cursos, calificaciones y asistencia aquí.
   </div>
-
   <div class="row g-4 mb-4">
     <div class="col-md-6">
       <div class="card bg-dark border-success text-center shadow h-100">
@@ -29,9 +28,8 @@
       </div>
     </div>
   </div>
-
   <div class="card shadow bg-dark border-secondary mt-4">
-    <div class="card-header text-white bg-secondary fw-bold">
+    <div class="card-header text-white bg-primary fw-bold">
       <i class="fas fa-list-ol"></i> Tus Cursos
     </div>
     <div class="card-body">

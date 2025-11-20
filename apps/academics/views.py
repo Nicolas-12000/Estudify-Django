@@ -5,10 +5,10 @@ from apps.academics.models import Grade
 from apps.courses.models import Subject
 import pandas as pd
 
-# ----- IMPORTACIÓN DE NOTAS DESDE EXCEL -----
+# ---- IMPORTACIÓN DE NOTAS DESDE EXCEL ----
 @login_required
 def import_grades(request):
-    """Importar calificaciones en masa desde archivo Excel. Solo profesores."""
+    """Importar calificaciones desde archivo Excel (.xlsx) — SOLO docentes."""
     if not getattr(request.user, 'is_teacher', False):
         return redirect('home')
 
@@ -24,12 +24,12 @@ def import_grades(request):
                 return render(request, 'academics/import_grades.html', {'form': form})
 
             errores = []
-            successful = 0
+            exitosos = 0
             for i, row in df.iterrows():
                 subject_code = str(row.get('materia_codigo', '')).strip()
                 valor = row.get('valor', None)
                 if not subject_code or pd.isnull(valor):
-                    continue  # Saltar filas sin datos
+                    continue
 
                 try:
                     value = float(valor)
@@ -46,46 +46,34 @@ def import_grades(request):
                         comments=comments,
                         graded_by=request.user
                     )
-                    successful += 1
+                    exitosos += 1
                 except Exception as e:
                     errores.append(f"Fila {i+2}: {str(e)}")
             return render(request, 'academics/import_result.html', {
                 'errors': errores,
-                'success_count': successful
+                'success_count': exitosos
             })
     else:
         form = GradeImportForm()
     return render(request, 'academics/import_grades.html', {'form': form})
 
-# ----- VISTAS DE LISTADO -----
 @login_required
 def grades_list(request):
-    """
-    Listado de calificaciones (puedes filtrar por usuario/rol aquí).
-    """
-    # Puedes pasar una lista de calificaciones si lo deseas
-    # grades = Grade.objects.all()
-    return render(request, 'academics/grades_list.html')#, {'grades': grades})
+    """Listado de calificaciones"""
+    # Pasa grades si quieres filtrar, o usa paginación aquí
+    return render(request, 'academics/grades_list.html')
 
 @login_required
 def attendance_list(request):
-    """
-    Listado de asistencias.
-    """
-    # attendances = Attendance.objects.all()
-    return render(request, 'academics/attendance_list.html')#, {'attendances': attendances})
+    """Listado de asistencias"""
+    return render(request, 'academics/attendance_list.html')
 
-# ----- VISTAS DE CREACIÓN -----
 @login_required
 def grade_create(request):
-    """
-    Crear nueva calificación (formulario).
-    """
+    """Crear nueva calificación"""
     return render(request, 'academics/grade_form.html')
 
 @login_required
 def attendance_create(request):
-    """
-    Crear nueva asistencia (formulario).
-    """
+    """Crear nueva asistencia"""
     return render(request, 'academics/attendance_form.html')

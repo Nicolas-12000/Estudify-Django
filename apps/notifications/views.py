@@ -5,16 +5,20 @@ from rest_framework.response import Response
 from apps.notifications.models import Notification
 from .serializers import NotificationSerializer
 
-
 class NotificationListView(generics.ListAPIView):
+    """
+    Lista todas las notificaciones del usuario autenticado (recientes primero)
+    """
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = NotificationSerializer
 
     def get_queryset(self):
         return Notification.objects.filter(user=self.request.user).order_by('-created_at')
 
-
 class NotificationMarkReadView(generics.UpdateAPIView):
+    """
+    Marca una notificación como leída (solo si es tuya)
+    """
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = NotificationSerializer
     queryset = Notification.objects.all()
@@ -28,12 +32,10 @@ class NotificationMarkReadView(generics.UpdateAPIView):
         notif.save()
         return Response(self.get_serializer(notif).data)
 
-
 class NotificationMarkAllReadView(generics.GenericAPIView):
-    """Mark all unread notifications for the authenticated user as read.
-
+    """
+    Marca TODAS las notificaciones como leídas para el usuario autenticado.
     POST /api/notifications/mark_all_read/
-    Returns JSON with the number of notifications updated.
     """
     permission_classes = [permissions.IsAuthenticated]
 
@@ -42,5 +44,3 @@ class NotificationMarkAllReadView(generics.GenericAPIView):
         now = timezone.now()
         updated = qs.update(is_read=True, read_at=now)
         return Response({"updated": updated}, status=status.HTTP_200_OK)
-
-# Create your views here.

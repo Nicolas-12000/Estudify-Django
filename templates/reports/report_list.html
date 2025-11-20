@@ -1,8 +1,62 @@
 {% extends "base.html" %}
 {% block title %}Reportes - Estudify{% endblock %}
 {% block content %}
-<h2 class="mb-4 text-accent"><i class="fas fa-file-alt"></i> Reportes y Boletines</h2>
-<div class="alert alert-info">
-  Aquí irán los reportes descargables (PDF/Excel) y las estadísticas del sistema muy pronto.
+<div class="container py-5">
+  <h2 class="mb-4 text-warning fw-bold">
+    <i class="fas fa-file-alt"></i> Reportes y Boletines
+  </h2>
+
+  <div class="alert alert-info shadow-sm mb-5">
+    Aquí encontrarás todos los reportes descargables (PDF, Excel) y los dashboards de estadísticas de tu sistema académico.
+    <br>
+    <span class="mt-2 d-inline-block"><i class="fas fa-lightbulb text-accent"></i> Pronto podrás <b>exportar boletines</b> y consultar <b>métricas avanzadas</b> desde esta sección.</span>
+  </div>
+
+  <div class="row g-4 mb-2">
+    <div class="col-md-6 col-lg-4">
+      <div class="card h-100 shadow border-0 hover-lift">
+        <div class="card-body text-center">
+          <i class="fas fa-file-pdf fa-3x text-danger mb-3"></i>
+          <h5 class="card-title fw-bold">Boletines en PDF</h5>
+          <p class="card-text text-secondary">Descarga boletines académicos individuales en formato profesional (PDF).</p>
+          <button class="btn btn-outline-danger" disabled>
+            <i class="fas fa-cloud-download-alt"></i> Descargar todo (pronto)
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6 col-lg-4">
+      <div class="card h-100 shadow border-0 hover-lift">
+        <div class="card-body text-center">
+          <i class="fas fa-file-excel fa-3x text-success mb-3"></i>
+          <h5 class="card-title fw-bold">Reportes en Excel</h5>
+          <p class="card-text text-secondary">Exporta reportes consolidados, asistencias y notas a formato Excel.</p>
+          <button class="btn btn-outline-success" disabled>
+            <i class="fas fa-file-export"></i> Exportar todo (pronto)
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-12 col-lg-4">
+      <div class="card h-100 shadow border-0 hover-lift">
+        <div class="card-body text-center">
+          <i class="fas fa-chart-bar fa-3x text-info mb-3"></i>
+          <h5 class="card-title fw-bold">Estadísticas Generales</h5>
+          <p class="card-text text-secondary">Visualiza gráficas sobre rendimiento académico, asistencia y más.</p>
+          <button class="btn btn-outline-info" disabled>
+            <i class="fas fa-chart-line"></i> Ver estadísticas (pronto)
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="alert alert-secondary mt-5 shadow text-center">
+    <i class="fas fa-bullhorn"></i>
+    <b>¿Tienes alguna sugerencia?</b> ¡Propón nuevos reportes o gráficos a soporte!
+  </div>
 </div>
+<style>
+.hover-lift:hover { transform: translateY(-5px) scale(1.02); box-shadow:0 12px 32px rgba(0,0,0,0.17) }
+</style>
 {% endblock %}

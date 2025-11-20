@@ -3,102 +3,106 @@
 {% block content %}
 <div class="container py-5">
   <div class="row mb-4">
-    <div class="col-md-12 text-center">
+    <div class="col-12 text-center">
       <h1 class="display-4 mb-2 text-danger fw-bold fade-in">
         <i class="fas fa-graduation-cap"></i> ¡Bienvenido a Estudify!
       </h1>
       <p class="lead text-secondary">La plataforma integral para tu gestión académica</p>
       <div class="alert alert-info mx-auto shadow-sm fade-in" style="font-size:1.1rem; max-width:490px">
         <i class="fas fa-lightbulb"></i>
-        <b>Consejo:</b> <i>El futuro pertenece a quienes creen en sus sueños.</i>
+        <b>Consejo:</b> <span style="font-style:italic;">El futuro pertenece a quienes creen en sus sueños.</span>
       </div>
     </div>
   </div>
+
   <div class="row gy-4 justify-content-center">
-    <div class="col-12 col-md-6 col-lg-3">
-      <a href="{% url 'users:profile' %}" class="card bg-dark border-danger shadow-lg text-center h-100 pointer hover-lift">
-        <div class="card-body">
+    <div class="col-12 col-sm-6 col-lg-3">
+      <a href="{% url 'users:profile' %}" class="card card-link bg-dark border-danger shadow-lg text-center h-100 pointer hover-lift">
+        <div class="card-body p-4">
           <i class="fas fa-user-circle fa-3x text-danger mb-2"></i>
-          <h4 class="card-title fw-bold">Mi Perfil</h4>
-          <p class="card-text text-secondary">Actualiza tu información personal.</p>
+          <h4 class="card-title fw-bold mt-2">Mi Perfil</h4>
+          <p class="card-text text-secondary mb-0">Actualiza tu información personal.</p>
         </div>
       </a>
     </div>
-    <div class="col-12 col-md-6 col-lg-3">
-      <a href="{% url 'academics:grades_list' %}" class="card bg-dark border-primary shadow-lg text-center h-100 pointer hover-lift">
-        <div class="card-body">
+    <div class="col-12 col-sm-6 col-lg-3">
+      <a href="{% url 'academics:grades_list' %}" class="card card-link bg-dark border-primary shadow-lg text-center h-100 pointer hover-lift">
+        <div class="card-body p-4">
           <i class="fas fa-list-ol fa-3x text-primary mb-2"></i>
-          <h4 class="card-title fw-bold">Calificaciones</h4>
-          <p class="card-text text-secondary">Consulta y gestiona tus notas.</p>
+          <h4 class="card-title fw-bold mt-2">Calificaciones</h4>
+          <p class="card-text text-secondary mb-0">Consulta y gestiona tus notas.</p>
         </div>
       </a>
     </div>
-    <div class="col-12 col-md-6 col-lg-3">
-      <a href="{% url 'academics:attendance_list' %}" class="card bg-dark border-success shadow-lg text-center h-100 pointer hover-lift">
-        <div class="card-body">
+    <div class="col-12 col-sm-6 col-lg-3">
+      <a href="{% url 'academics:attendance_list' %}" class="card card-link bg-dark border-success shadow-lg text-center h-100 pointer hover-lift">
+        <div class="card-body p-4">
           <i class="fas fa-calendar-check fa-3x text-success mb-2"></i>
-          <h4 class="card-title fw-bold">Asistencias</h4>
-          <p class="card-text text-secondary">Historial de presencias y ausencias.</p>
+          <h4 class="card-title fw-bold mt-2">Asistencias</h4>
+          <p class="card-text text-secondary mb-0">Historial de presencias y ausencias.</p>
         </div>
       </a>
     </div>
-    <div class="col-12 col-md-6 col-lg-3">
-      <a href="{% url 'users:user_list' %}" class="card bg-dark border-info shadow-lg text-center h-100 pointer hover-lift">
-        <div class="card-body">
+    <div class="col-12 col-sm-6 col-lg-3">
+      <a href="{% url 'users:user_list' %}" class="card card-link bg-dark border-info shadow-lg text-center h-100 pointer hover-lift">
+        <div class="card-body p-4">
           <i class="fas fa-users fa-3x text-info mb-2"></i>
-          <h4 class="card-title fw-bold">Usuarios</h4>
-          <p class="card-text text-secondary">Listado de todos los usuarios.</p>
+          <h4 class="card-title fw-bold mt-2">Usuarios</h4>
+          <p class="card-text text-secondary mb-0">Listado de todos los usuarios.</p>
         </div>
       </a>
     </div>
   </div>
+
   <div class="row gy-4 mt-2 justify-content-center">
-    <div class="col-12 col-md-6 col-lg-3">
-      <a href="{% url 'admin_panel:dashboard' %}" class="card bg-dark border-warning shadow-lg text-center h-100 pointer hover-lift">
-        <div class="card-body">
+    <div class="col-12 col-sm-6 col-lg-3">
+      <a href="{% url 'panel_admin' %}" class="card card-link bg-dark border-warning shadow-lg text-center h-100 pointer hover-lift">
+        <div class="card-body p-4">
           <i class="fas fa-tachometer-alt fa-3x text-warning mb-2"></i>
-          <h4 class="card-title fw-bold">Dashboard Admin</h4>
-          <p class="card-text text-secondary">Panel de control administrativo.</p>
+          <h4 class="card-title fw-bold mt-2">Panel Admin</h4>
+          <p class="card-text text-secondary mb-0">Gestión administrativa general.</p>
         </div>
       </a>
     </div>
-    <div class="col-12 col-md-6 col-lg-3">
-      <a href="{% url 'reports:report_list' %}" class="card bg-dark border-light shadow-lg text-center h-100 pointer hover-lift">
-        <div class="card-body">
+    <div class="col-12 col-sm-6 col-lg-3">
+      <a href="{% url 'reports:report_list' %}" class="card card-link bg-dark border-light shadow-lg text-center h-100 pointer hover-lift">
+        <div class="card-body p-4">
           <i class="fas fa-file-alt fa-3x text-light mb-2"></i>
-          <h4 class="card-title fw-bold">Reportes</h4>
-          <p class="card-text text-secondary">Informes y estadísticas educativas.</p>
+          <h4 class="card-title fw-bold mt-2">Reportes</h4>
+          <p class="card-text text-secondary mb-0">Informes y estadísticas educativas.</p>
         </div>
       </a>
     </div>
-    <div class="col-12 col-md-6 col-lg-3">
-      <a href="/api/docs/" class="card bg-dark border-secondary shadow-lg text-center h-100 pointer hover-lift">
-        <div class="card-body">
+    <div class="col-12 col-sm-6 col-lg-3">
+      <a href="/api/docs/" class="card card-link bg-dark border-secondary shadow-lg text-center h-100 pointer hover-lift">
+        <div class="card-body p-4">
           <i class="fas fa-book fa-3x text-secondary mb-2"></i>
-          <h4 class="card-title fw-bold">API Docs</h4>
-          <p class="card-text text-secondary">Documentación interactiva de la API.</p>
+          <h4 class="card-title fw-bold mt-2">API Docs</h4>
+          <p class="card-text text-secondary mb-0">Documentación interactiva de la API.</p>
         </div>
       </a>
     </div>
-    <div class="col-12 col-md-6 col-lg-3">
-      <a href="{% url 'users:logout' %}" class="card bg-dark border-danger shadow-lg text-center h-100 pointer hover-lift">
-        <div class="card-body">
+    <div class="col-12 col-sm-6 col-lg-3">
+      <a href="{% url 'users:logout' %}" class="card card-link bg-dark border-danger shadow-lg text-center h-100 pointer hover-lift">
+        <div class="card-body p-4">
           <i class="fas fa-sign-out-alt fa-3x text-danger mb-2"></i>
-          <h4 class="card-title fw-bold">Salir</h4>
-          <p class="card-text text-secondary">Cerrar sesión en Estudify.</p>
+          <h4 class="card-title fw-bold mt-2">Salir</h4>
+          <p class="card-text text-secondary mb-0">Cerrar sesión en Estudify.</p>
         </div>
       </a>
     </div>
   </div>
-  <div class="alert alert-secondary mt-5 py-3 text-center shadow">
+
+  <div class="alert alert-secondary mt-5 py-3 text-center shadow fade-in">
     <i class="fas fa-bullhorn fa-fw"></i>
     <b>¡Explora el menú!</b> Navega rápido por tu campus virtual y gestiona tu progreso.
   </div>
 </div>
 <style>
 .fade-in { animation: fadeIn 1.5s; }
-.pointer:hover, .hover-lift:hover { transform: translateY(-4px) scale(1.03); transition: 0.3s; }
+.pointer:hover, .hover-lift:hover { transform: translateY(-4px) scale(1.04); transition: 0.22s; }
 @keyframes fadeIn { from {opacity:0;} to {opacity:1;} }
-.card { transition: all 0.3s; }
+.card, .card-link { transition: box-shadow 0.3s, transform 0.24s; cursor:pointer }
+.card-link:focus, .card-link:hover { box-shadow: 0 6px 32px rgba(255, 0, 0, 0.15) !important; }
 </style>
 {% endblock %}

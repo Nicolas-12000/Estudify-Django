@@ -3,21 +3,25 @@
 {% block title %}403 - Acceso Denegado{% endblock %}
 
 {% block content %}
-<div class="error-page">
-    <div class="container">
-        <h1>403</h1>
-        <h2>Acceso Denegado</h2>
-        <p>Lo sentimos, no tienes permisos para acceder a este recurso.</p>
-        <p>Si crees que deberías tener acceso, contacta al administrador.</p>
-        
-        <div class="mt-4">
-            <a href="{% url 'home' %}" class="btn btn-primary btn-lg">
-                <i class="fas fa-home"></i> Volver al Inicio
-            </a>
-            <a href="javascript:history.back()" class="btn btn-outline-light btn-lg ms-2">
-                <i class="fas fa-arrow-left"></i> Regresar
-            </a>
-        </div>
+<div class="error-page d-flex align-items-center justify-content-center" style="min-height:60vh;">
+  <div class="container text-center">
+    <div class="display-1 fw-bold mb-1 text-danger">
+      <i class="fas fa-user-lock"></i> 403
     </div>
+    <h2 class="mb-3">Acceso Denegado</h2>
+    <p class="lead text-secondary">Lo sentimos, no tienes permisos para acceder a este recurso.</p>
+    <p class="text-muted">Si crees que deberías tener acceso, contacta al administrador.</p>
+    <div class="mt-4">
+      <a href="{% url 'home' %}" class="btn btn-primary btn-lg shadow">
+        <i class="fas fa-home"></i> Volver al Inicio
+      </a>
+      <a href="javascript:history.back()" class="btn btn-outline-light btn-lg ms-2 shadow">
+        <i class="fas fa-arrow-left"></i> Regresar
+      </a>
+    </div>
+  </div>
 </div>
+<style>
+.error-page h1, .error-page .display-1 { text-shadow:0 3px 12px rgba(0,0,0,0.11); }
+</style>
 {% endblock %}

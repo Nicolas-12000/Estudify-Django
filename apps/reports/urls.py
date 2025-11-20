@@ -5,5 +5,7 @@ app_name = 'reports'
 
 urlpatterns = [
     path('', views.report_list, name='report_list'),
-    # Puedes agregar más rutas después para PDFs, Excel, etc.
+    # Después puedes agregar:
+    # path('pdf/', views.report_pdf, name='report_pdf'),
+    # path('excel/', views.report_excel, name='report_excel'),
 ]

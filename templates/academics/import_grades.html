@@ -1,44 +1,43 @@
 {% extends "base.html" %}
 {% block title %}Importar Notas{% endblock %}
 {% block content %}
-<h2 class="mb-4"><i class="fas fa-file-upload"></i> Importar Calificaciones desde Excel</h2>
-<div class="card bg-dark border-info shadow">
+<div class="container py-4">
+  <h2 class="mb-4"><i class="fas fa-file-upload"></i> Importar Calificaciones desde Excel</h2>
+  <div class="card bg-dark border-info shadow">
     <div class="card-header bg-info text-white">
-        <i class="fas fa-upload"></i> Cargar archivo .xlsx para un estudiante
+      <i class="fas fa-upload"></i> Cargar archivo .xlsx para un estudiante
     </div>
     <div class="card-body">
-        <form method="post" enctype="multipart/form-data">
-            {% csrf_token %}
-            <div class="mb-3">
-                {{ form.student.label_tag }}
-                {{ form.student }}
-                {% for error in form.student.errors %}
-                    <div class="text-danger">{{ error }}</div>
-                {% endfor %}
-            </div>
-            <div class="mb-3">
-                {{ form.file.label_tag }}
-                {{ form.file }}
-                {% for error in form.file.errors %}
-                    <div class="text-danger">{{ error }}</div>
-                {% endfor %}
-            </div>
-            {% if form.non_field_errors %}
-                <div class="alert alert-danger">{{ form.non_field_errors }}</div>
-            {% endif %}
-            <button type="submit" class="btn btn-success px-4">
-                <i class="fas fa-file-excel"></i> Importar
-            </button>
-            <a href="{% url 'academics:grades_list' %}" class="btn btn-outline-light">
-                <i class="fas fa-arrow-left"></i> Volver
-            </a>
-        </form>
-        <div class="mt-4 alert alert-secondary">
-            <b>Ejemplo columnas del archivo Excel:</b><br>
-            <code>materia_codigo, valor, tipo, peso, comentario</code>
-            <p>No pongas la columna usuario. Todas las filas se aplican solo al estudiante elegido arriba.</p>
+      <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="mb-3">
+          {{ form.student.label_tag }} {{ form.student }}
+          {% for error in form.student.errors %}
+            <div class="text-danger">{{ error }}</div>
+          {% endfor %}
         </div>
+        <div class="mb-3">
+          {{ form.file.label_tag }} {{ form.file }}
+          {% for error in form.file.errors %}
+            <div class="text-danger">{{ error }}</div>
+          {% endfor %}
+        </div>
+        {% if form.non_field_errors %}
+          <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+        {% endif %}
+        <button type="submit" class="btn btn-success px-4">
+          <i class="fas fa-file-excel"></i> Importar
+        </button>
+        <a href="{% url 'academics:grades_list' %}" class="btn btn-outline-light ms-2">
+          <i class="fas fa-arrow-left"></i> Volver
+        </a>
+      </form>
+      <div class="mt-4 alert alert-secondary">
+        <b>Ejemplo columnas del archivo Excel:</b><br>
+        <code>materia_codigo, valor, tipo, peso, comentario</code>
+        <p>No pongas la columna usuario. Todas las filas se aplican solo al estudiante elegido arriba.</p>
+      </div>
     </div>
+  </div>
 </div>
 {% endblock %}
-

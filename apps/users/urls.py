@@ -12,4 +12,3 @@ urlpatterns = [
     path('<int:pk>/', views.user_detail_view, name='user_detail'),
     path('<int:pk>/toggle/', views.toggle_user_status, name='toggle_status'),
 ]
-
