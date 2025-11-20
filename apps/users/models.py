@@ -107,6 +107,7 @@ class User(AbstractUser):
         if self.username:
             validate_username_field(self.username)
 
+
 class Profile(AbstractBaseModel):
     """
     Perfil extendido del usuario con información adicional.
