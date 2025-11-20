@@ -1,9 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Helper para iniciar Render con SQLite (crea archivo si falta, corre migraciones, aplica seed y arranca Gunicorn)
-
-# Detectar ruta de DB SQLite
+# --- Configuración ruta BD SQLite ---
 if [ -n "${DATABASE_URL-}" ] && [[ "$DATABASE_URL" == sqlite:* ]]; then
   if [[ "$DATABASE_URL" == sqlite:////* ]]; then
     DB_PATH="${DATABASE_URL#sqlite:}"
@@ -17,7 +15,6 @@ else
 fi
 
 echo "[render_start] using sqlite path: $DB_PATH"
-
 mkdir -p "$(dirname "$DB_PATH")"
 
 if [ ! -f "$DB_PATH" ]; then
