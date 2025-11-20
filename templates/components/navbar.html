@@ -12,11 +12,11 @@
         <li class="nav-item"><a class="nav-link" href="{% url 'home' %}"><i class="fas fa-home"></i> Inicio</a></li>
         <li class="nav-item"><a class="nav-link" href="/api/docs/"><i class="fas fa-book"></i> API Docs</a></li>
         {% if user.is_authenticated %}
-          {% if user.is_superuser or user.is_staff or user.role == "admin" %}
+          {% if user.is_superuser or user.is_staff or user.is_admin_role %}
             <li class="nav-item"><a class="nav-link" href="{% url 'panel_admin' %}"><i class="fas fa-tools"></i> Admin</a></li>
-          {% elif user.role == "teacher" %}
+          {% elif user.is_teacher %}
             <li class="nav-item"><a class="nav-link" href="{% url 'panel_profesor' %}"><i class="fas fa-chalkboard-teacher"></i> Profesor</a></li>
-          {% elif user.role == "student" %}
+          {% elif user.is_student %}
             <li class="nav-item"><a class="nav-link" href="{% url 'panel_estudiante' %}"><i class="fas fa-user-graduate"></i> Estudiante</a></li>
           {% endif %}
           <li class="nav-item dropdown">

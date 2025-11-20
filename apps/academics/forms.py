@@ -51,11 +51,53 @@ class GradeForm(forms.ModelForm):
         teacher = kwargs.pop('teacher', None)
         super().__init__(*args, **kwargs)
 
-        # Filtrar solo estudiantes
-        self.fields['student'].queryset = User.objects.filter(
-            role=User.UserRole.STUDENT,
-            is_active=True
-        )
+        # Filtrar solo estudiantes (si es docente, mostrar solo alumnos inscritos en sus cursos)
+        try:
+            if teacher and teacher.is_teacher:
+                from apps.courses.models import CourseEnrollment
+                students_qs = User.objects.filter(
+                    enrollments__course__teacher=teacher,
+                    role=User.UserRole.STUDENT,
+                    is_active=True
+                ).distinct()
+            else:
+                students_qs = User.objects.filter(
+                    role=User.UserRole.STUDENT,
+                    is_active=True
+                )
+            # If a specific subject is provided via initial or POST data, narrow students to that subject's course enrollments
+            subj_field = 'subject'
+            subj_id = None
+            if self.data and subj_field in self.data:
+                try:
+                    subj_id = int(self.data.get(subj_field))
+                except Exception:
+                    subj_id = None
+            if not subj_id and self.initial and subj_field in self.initial:
+                try:
+                    subj_id = int(self.initial.get(subj_field))
+                except Exception:
+                    subj_id = None
+
+            if subj_id:
+                try:
+                    from apps.courses.models import Subject as SubjectModel
+                    subj_obj = SubjectModel.objects.filter(pk=subj_id).first()
+                    if subj_obj and subj_obj.course_id:
+                        students_qs = students_qs.filter(enrollments__course_id=subj_obj.course_id).distinct()
+                except Exception:
+                    pass
+
+            self.fields['student'].queryset = students_qs
+            # friendlier empty label
+            if hasattr(self.fields['student'], 'empty_label'):
+                try:
+                    self.fields['student'].empty_label = 'Selecciona un estudiante'
+                except Exception:
+                    pass
+        except Exception:
+            # fallback to broad queryset
+            self.fields['student'].queryset = User.objects.filter(role=User.UserRole.STUDENT, is_active=True)
 
         # Si hay un docente, filtrar materias que imparte
         if teacher and teacher.is_teacher:
@@ -63,6 +105,19 @@ class GradeForm(forms.ModelForm):
                 teacher=teacher,
                 is_active=True
             )
+            # Si sólo hay una materia, pre-seleccionarla para mejorar UX
+            try:
+                subj_qs = self.fields['subject'].queryset
+                if subj_qs.count() == 1:
+                    self.fields['subject'].initial = subj_qs.first().pk
+            except Exception:
+                pass
+            # friendlier empty label
+            if hasattr(self.fields['subject'], 'empty_label'):
+                try:
+                    self.fields['subject'].empty_label = 'Selecciona una materia'
+                except Exception:
+                    pass
 
     def clean(self):
         """Validación personalizada."""
@@ -73,14 +128,9 @@ class GradeForm(forms.ModelForm):
         if student and subject:
             # Verificar que el estudiante esté inscrito en el curso
             from apps.courses.models import CourseEnrollment
-            if not CourseEnrollment.objects.filter(
-                student=student,
-                course=subject.course,
-                is_active=True
-            ).exists():
-                raise forms.ValidationError(
-                    'El estudiante no está inscrito en el curso de esta materia.'
-                )
+            if not CourseEnrollment.objects.filter(student=student, course=subject.course, is_active=True).exists():
+                # attach error to student field for clearer UX
+                self.add_error('student', 'El estudiante no está inscrito en el curso de esta materia.')
 
         return cleaned_data
 
@@ -111,11 +161,33 @@ class AttendanceForm(forms.ModelForm):
         teacher = kwargs.pop('teacher', None)
         super().__init__(*args, **kwargs)
 
-        # Filtrar solo estudiantes
-        self.fields['student'].queryset = User.objects.filter(
-            role=User.UserRole.STUDENT,
-            is_active=True
-        )
+        # Filtrar solo estudiantes (por defecto todos los estudiantes activos)
+        students_qs = User.objects.filter(role=User.UserRole.STUDENT, is_active=True)
+        # Si hay docente, filtrar sólo estudiantes inscritos en sus cursos
+        if teacher and teacher.is_teacher:
+            students_qs = students_qs.filter(enrollments__course__teacher=teacher).distinct()
+
+        # If a specific course is provided via initial or POST data, narrow students to that course's enrollments
+        course_field = 'course'
+        course_id = None
+        if self.data and course_field in self.data:
+            try:
+                course_id = int(self.data.get(course_field))
+            except Exception:
+                course_id = None
+        if not course_id and self.initial and course_field in self.initial:
+            try:
+                course_id = int(self.initial.get(course_field))
+            except Exception:
+                course_id = None
+
+        if course_id:
+            try:
+                students_qs = students_qs.filter(enrollments__course_id=course_id).distinct()
+            except Exception:
+                pass
+
+        self.fields['student'].queryset = students_qs
 
         # Si hay docente, filtrar cursos que imparte
         if teacher and teacher.is_teacher:
@@ -123,6 +195,19 @@ class AttendanceForm(forms.ModelForm):
                 teacher=teacher,
                 is_active=True
             )
+            # Si sólo hay un curso, pré-seleccionar
+            try:
+                course_qs = self.fields['course'].queryset
+                if course_qs.count() == 1:
+                    self.fields['course'].initial = course_qs.first().pk
+            except Exception:
+                pass
+            # friendlier empty label
+            if hasattr(self.fields['course'], 'empty_label'):
+                try:
+                    self.fields['course'].empty_label = 'Selecciona un curso'
+                except Exception:
+                    pass
 
     def clean(self):
         """Validación personalizada."""
@@ -133,14 +218,9 @@ class AttendanceForm(forms.ModelForm):
         if student and course:
             # Verificar que el estudiante esté inscrito en el curso
             from apps.courses.models import CourseEnrollment
-            if not CourseEnrollment.objects.filter(
-                student=student,
-                course=course,
-                is_active=True
-            ).exists():
-                raise forms.ValidationError(
-                    'El estudiante no está inscrito en este curso.'
-                )
+            if not CourseEnrollment.objects.filter(student=student, course=course, is_active=True).exists():
+                # attach error to student field for clearer UX
+                self.add_error('student', 'El estudiante no está inscrito en este curso.')
 
         return cleaned_data
 

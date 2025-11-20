@@ -52,7 +52,7 @@
     <a class="estudify-logo" href="/">ESTUDIFY</a>
     <nav>
       <a href="/admin/">Admin</a>
-      {% if user.is_authenticated and (user.is_admin_role or user.is_staff) %}
+      {% if user.is_authenticated and user.is_admin_role or user.is_authenticated and user.is_staff %}
         <a href="/api/docs/">API Docs</a>
       {% endif %}
     </nav>

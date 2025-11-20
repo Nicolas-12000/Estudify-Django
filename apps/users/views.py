@@ -52,13 +52,27 @@ def panel_profesor(request):
 def panel_estudiante(request):
     if not is_student(request.user):
         raise PermissionDenied
-    courses = getattr(request.user.profile, 'courses', [])
-    courses_count = len(courses) if hasattr(courses, '__len__') else courses.count() if hasattr(courses, 'count') else 0
-    grades_summary = "—"
+    # Obtener cursos desde CourseEnrollment (asegura consistencia con el seed)
+    from apps.courses.models import CourseEnrollment, Course
+    enroll_qs = CourseEnrollment.objects.filter(student=request.user, is_active=True).select_related('course')
+    courses = [e.course for e in enroll_qs]
+    courses_count = len(courses)
+
+    # Resumen simple de calificaciones: promedio global y últimas 5 notas
+    from apps.academics.models import Grade
+    grades_qs = Grade.objects.filter(student=request.user).order_by('-graded_date')
+    recent = grades_qs[:5]
+    try:
+        from django.db import models as dj_models
+        avg = grades_qs.aggregate(avg=dj_models.Avg('value'))['avg']
+    except Exception:
+        avg = None
+    grades_summary = f"Promedio: {round(avg,2)}" if avg is not None else '—'
     return render(request, "core/panel_estudiante.html", {
         'courses': courses,
         'courses_count': courses_count,
         'grades_summary': grades_summary,
+        'recent_grades': recent,
     })
 
 @login_required

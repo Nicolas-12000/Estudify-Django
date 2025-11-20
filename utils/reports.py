@@ -3,7 +3,7 @@ from io import BytesIO
 
 import pandas as pd
 from django.db.models import Avg
-from django.http import HttpResponse
+from django.http import FileResponse
 from openpyxl.styles import Alignment, Font, PatternFill
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import letter
@@ -31,6 +31,10 @@ class PDFReportGenerator:
         Returns:
             HttpResponse con el PDF generado
         """
+        # validate input
+        if not grades or grades.count() == 0:
+            raise ValueError('No hay calificaciones para generar el boletín.')
+
         buffer = BytesIO()
         doc = SimpleDocTemplate(buffer, pagesize=letter)
         elements = []
@@ -115,19 +119,17 @@ class PDFReportGenerator:
         # Construir PDF
         doc.build(elements)
         buffer.seek(0)
-
-        # Crear respuesta HTTP
-        response = HttpResponse(buffer, content_type='application/pdf')
         filename = f'boletin_{student.username}_{datetime.now().strftime("%Y%m%d")}.pdf'
-        response['Content-Disposition'] = 'attachment' + '\x3B' + f' filename="{filename}"'
-
-        return response
+        return FileResponse(buffer, as_attachment=True, filename=filename, content_type='application/pdf')
 
     @staticmethod
     def generate_attendance_report(student, attendances, course):
         """
         Generar reporte de asistencia para un estudiante.
         """
+        if not attendances or attendances.count() == 0:
+            raise ValueError('No hay registros de asistencia para generar el reporte.')
+
         buffer = BytesIO()
         doc = SimpleDocTemplate(buffer, pagesize=letter)
         elements = []
@@ -189,12 +191,8 @@ class PDFReportGenerator:
         elements.append(table)
         doc.build(elements)
         buffer.seek(0)
-
-        response = HttpResponse(buffer, content_type='application/pdf')
         filename = f'asistencia_{student.username}_{datetime.now().strftime("%Y%m%d")}.pdf'
-        response['Content-Disposition'] = 'attachment' + '\x3B' + f' filename="{filename}"'
-
-        return response
+        return FileResponse(buffer, as_attachment=True, filename=filename, content_type='application/pdf')
 
 
 class ExcelReportGenerator:
@@ -231,6 +229,9 @@ class ExcelReportGenerator:
                 'Letra': grade.letter_grade
             })
 
+        if len(data) == 0:
+            raise ValueError('No hay calificaciones para exportar.')
+
         # Crear DataFrame
         df = pd.DataFrame(data)
 
@@ -241,52 +242,55 @@ class ExcelReportGenerator:
             df.to_excel(writer, index=False, sheet_name='Calificaciones')
 
             # Obtener el workbook y worksheet para dar formato
-            writer.book
-            worksheet = writer.sheets['Calificaciones']
+            worksheet = writer.sheets.get('Calificaciones')
+            if worksheet is not None:
+                # Formato del encabezado
+                header_fill = PatternFill(
+                    start_color='FF0000',
+                    end_color='FF0000',
+                    fill_type='solid',
+                )
+                header_font = Font(color='FFFFFF', bold=True)
 
-            # Formato del encabezado
-            header_fill = PatternFill(
-                start_color='FF0000',
-                end_color='FF0000',
-                fill_type='solid',
-            )
-            header_font = Font(color='FFFFFF', bold=True)
-
-            for cell in worksheet[1]:
-                cell.fill = header_fill
-                cell.font = header_font
-                cell.alignment = Alignment(horizontal='center')
-
-            # Ajustar ancho de columnas
-            for column in worksheet.columns:
-                max_length = 0
-                column_letter = column[0].column_letter
-                for cell in column:
+                # openpyxl rows/cols: first row is 1
+                for cell in list(worksheet.rows)[0]:
                     try:
-                        if len(str(cell.value)) > max_length:
-                            max_length = len(cell.value)
-                    except BaseException:
+                        cell.fill = header_fill
+                        cell.font = header_font
+                        cell.alignment = Alignment(horizontal='center')
+                    except Exception:
                         pass
-                adjusted_width = min(max_length + 2, 50)
-                worksheet.column_dimensions[column_letter].width = adjusted_width
+
+                # Ajustar ancho de columnas
+                for column in worksheet.columns:
+                    max_length = 0
+                    try:
+                        column_letter = column[0].column_letter
+                    except Exception:
+                        continue
+                    for cell in column:
+                        try:
+                            if cell.value and len(str(cell.value)) > max_length:
+                                max_length = len(str(cell.value))
+                        except BaseException:
+                            pass
+                    adjusted_width = min(max_length + 2, 50)
+                    try:
+                        worksheet.column_dimensions[column_letter].width = adjusted_width
+                    except Exception:
+                        pass
 
         output.seek(0)
-
-        # Crear respuesta HTTP
-        response = HttpResponse(
-            output,
-            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-        )
         date_str = datetime.now().strftime("%Y%m%d")
-        response['Content-Disposition'] = 'attachment' + '\x3B' + f' filename="{filename}_{date_str}.xlsx"'
-
-        return response
+        filename_full = f"{filename}_{date_str}.xlsx"
+        return FileResponse(output, as_attachment=True, filename=filename_full, content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
 
     @staticmethod
     def generate_attendance_excel(attendances, filename='asistencias'):
         """
         Generar reporte de asistencias en Excel.
         """
+        # Preparar datos
         data = []
         for att in attendances:
             data.append({
@@ -299,47 +303,56 @@ class ExcelReportGenerator:
                 'Registrado por': att.recorded_by.get_full_name() if att.recorded_by else '-'
             })
 
+        if len(data) == 0:
+            raise ValueError('No hay registros de asistencia para exportar.')
+
         df = pd.DataFrame(data)
         output = BytesIO()
 
         with pd.ExcelWriter(output, engine='openpyxl') as writer:
             df.to_excel(writer, index=False, sheet_name='Asistencias')
 
-            writer.book
-            worksheet = writer.sheets['Asistencias']
+            worksheet = writer.sheets.get('Asistencias')
+            if worksheet is not None:
+                # Formato del encabezado
+                header_fill = PatternFill(
+                    start_color='FF0000',
+                    end_color='FF0000',
+                    fill_type='solid',
+                )
+                header_font = Font(color='FFFFFF', bold=True)
 
-            # Formato
-            header_fill = PatternFill(
-                start_color='FF0000',
-                end_color='FF0000',
-                fill_type='solid',
-            )
-            header_font = Font(color='FFFFFF', bold=True)
+                try:
+                    for cell in list(worksheet.rows)[0]:
+                        try:
+                            cell.fill = header_fill
+                            cell.font = header_font
+                            cell.alignment = Alignment(horizontal='center')
+                        except Exception:
+                            pass
+                except Exception:
+                    pass
 
-            for cell in worksheet[1]:
-                cell.fill = header_fill
-                cell.font = header_font
-                cell.alignment = Alignment(horizontal='center')
-
-            for column in worksheet.columns:
-                max_length = 0
-                column_letter = column[0].column_letter
-                for cell in column:
+                # Ajustar ancho de columnas
+                for column in worksheet.columns:
+                    max_length = 0
                     try:
-                        if len(str(cell.value)) > max_length:
-                            max_length = len(cell.value)
-                    except BaseException:
+                        column_letter = column[0].column_letter
+                    except Exception:
+                        continue
+                    for cell in column:
+                        try:
+                            if cell.value and len(str(cell.value)) > max_length:
+                                max_length = len(str(cell.value))
+                        except BaseException:
+                            pass
+                    adjusted_width = min(max_length + 2, 50)
+                    try:
+                        worksheet.column_dimensions[column_letter].width = adjusted_width
+                    except Exception:
                         pass
-                adjusted_width = min(max_length + 2, 50)
-                worksheet.column_dimensions[column_letter].width = adjusted_width
 
         output.seek(0)
-
-        response = HttpResponse(
-            output,
-            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-        )
         date_str = datetime.now().strftime("%Y%m%d")
-        response['Content-Disposition'] = 'attachment' + '\x3B' + f' filename="{filename}_{date_str}.xlsx"'
-
-        return response
+        filename_full = f"{filename}_{date_str}.xlsx"
+        return FileResponse(output, as_attachment=True, filename=filename_full, content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')

@@ -19,9 +19,35 @@
           <i class="fas fa-file-pdf fa-3x text-danger mb-3"></i>
           <h5 class="card-title fw-bold">Boletines en PDF</h5>
           <p class="card-text text-secondary">Descarga boletines académicos individuales en formato profesional (PDF).</p>
-          <button class="btn btn-outline-danger" disabled>
-            <i class="fas fa-cloud-download-alt"></i> Descargar todo (pronto)
-          </button>
+          {% if user.is_authenticated and user.is_admin_role or user.is_authenticated and user.is_teacher %}
+            {% if students and students|length > 0 %}
+              <form id="boletin-form" class="d-flex justify-content-center gap-2" onsubmit="return downloadBoletin()" method="get">
+                <select id="boletin-student" class="form-select form-select-sm">
+                  <option value="">Selecciona estudiante...</option>
+                  {% for s in students %}
+                    <option value="{{ s.id }}">{{ s.get_full_name }} ({{ s.username }})</option>
+                  {% endfor %}
+                </select>
+                <select id="boletin-course" name="course_id" class="form-select form-select-sm">
+                  <option value="">Todos los cursos</option>
+                  {% for c in courses %}
+                    <option value="{{ c.id }}">{{ c.name }}</option>
+                  {% endfor %}
+                </select>
+                <button class="btn btn-outline-danger btn-sm" type="submit">
+                  <i class="fas fa-cloud-download-alt"></i> Descargar boletín
+                </button>
+              </form>
+            {% else %}
+              <button class="btn btn-outline-danger" disabled>
+                <i class="fas fa-cloud-download-alt"></i> Descargar boletines (sin estudiantes)
+              </button>
+            {% endif %}
+          {% else %}
+            <button class="btn btn-outline-danger" disabled>
+              <i class="fas fa-cloud-download-alt"></i> Descargar boletines
+            </button>
+          {% endif %}
         </div>
       </div>
     </div>
@@ -31,9 +57,32 @@
           <i class="fas fa-file-excel fa-3x text-success mb-3"></i>
           <h5 class="card-title fw-bold">Reportes en Excel</h5>
           <p class="card-text text-secondary">Exporta reportes consolidados, asistencias y notas a formato Excel.</p>
-          <button class="btn btn-outline-success" disabled>
-            <i class="fas fa-file-export"></i> Exportar todo (pronto)
-          </button>
+          {% if user.is_authenticated and user.is_admin_role or user.is_authenticated and user.is_teacher %}
+            <form action="{% url 'reports:export_grades_excel' %}" method="get" class="d-flex justify-content-center gap-2">
+              {% if courses %}
+                <select name="course_id" class="form-select form-select-sm" aria-label="Curso">
+                  <option value="">Todos los cursos</option>
+                  {% for c in courses %}
+                    <option value="{{ c.id }}">{{ c.name }}</option>
+                  {% endfor %}
+                </select>
+              {% endif %}
+              <input type="date" name="start_date" class="form-control form-control-sm" placeholder="Desde">
+              <input type="date" name="end_date" class="form-control form-control-sm" placeholder="Hasta">
+              <button class="btn btn-outline-success btn-sm" type="submit">
+                <i class="fas fa-file-export"></i> Exportar calificaciones
+              </button>
+            </form>
+            <div class="mt-2">
+              <a class="btn btn-outline-success btn-sm" href="{% url 'reports:export_attendance_excel' %}">
+                <i class="fas fa-file-export"></i> Exportar asistencias (Excel)
+              </a>
+            </div>
+          {% else %}
+            <button class="btn btn-outline-success" disabled>
+              <i class="fas fa-file-export"></i> Exportar todo (pronto)
+            </button>
+          {% endif %}
         </div>
       </div>
     </div>
@@ -59,4 +108,23 @@
 <style>
 .hover-lift:hover { transform: translateY(-5px) scale(1.02); box-shadow:0 12px 32px rgba(0,0,0,0.17) }
 </style>
+<script>
+  function downloadBoletin() {
+    var studentId = document.getElementById('boletin-student').value;
+    if (!studentId) {
+      alert('Selecciona un estudiante para descargar el boletín.');
+      return false;
+    }
+    var courseSelect = document.getElementById('boletin-course');
+    var courseId = courseSelect ? courseSelect.value : '';
+    var url = '{% url "reports:download_boletin_pdf" 0 %}';
+    // replace trailing 0 with selected id (URL contains the literal 0)
+    url = url.replace('/0/', '/' + studentId + '/');
+    if (courseId) {
+      url += '?course_id=' + encodeURIComponent(courseId);
+    }
+    window.location.href = url;
+    return false;
+  }
+</script>
 {% endblock %}

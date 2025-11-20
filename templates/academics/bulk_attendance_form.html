@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}Asistencia Masiva{% endblock %}
+{% block content %}
+<div class="container py-4">
+  <h2 class="mb-4">Registrar Asistencia Masiva</h2>
+  <div class="card bg-dark shadow border-secondary">
+    <div class="card-body">
+      <form method="post">
+        {% csrf_token %}
+        <div class="row">
+          <div class="col-md-6">
+            <div class="mb-3">
+              {{ form.course.label_tag }}
+              {{ form.course }}
+              {% if form.course.errors %}
+                <div class="text-danger small">{{ form.course.errors|striptags }}</div>
+              {% endif %}
+            </div>
+            <div class="mb-3">
+              {{ form.date.label_tag }}
+              {{ form.date }}
+              {% if form.date.errors %}
+                <div class="text-danger small">{{ form.date.errors|striptags }}</div>
+              {% endif %}
+            </div>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Estudiantes inscritos</label>
+            <div class="list-group mb-3 bg-transparent">
+              {% if enrolled_students %}
+                {% for s in enrolled_students %}
+                  <label class="list-group-item bg-dark border-secondary d-flex align-items-center">
+                    <input type="checkbox" name="students" value="{{ s.id }}" class="form-check-input me-2">
+                    <span>{{ s.get_full_name }} <small class="text-muted">({{ s.username }})</small></span>
+                  </label>
+                {% endfor %}
+              {% else %}
+                <div class="text-muted">Selecciona un curso para listar estudiantes inscritos.</div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+
+        <button class="btn btn-primary" type="submit">Registrar seleccionados</button>
+        <a href="{% url 'academics:attendance_list' %}" class="btn btn-outline-light ms-2">Cancelar</a>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -3,7 +3,112 @@
 {% block content %}
 <div class="container py-4">
   <h2 class="mb-4"><i class="fas fa-plus"></i> Nueva Calificación</h2>
-  <!-- Aquí va tu formulario Django normalmente -->
-  <div class="alert alert-secondary">Próximamente el formulario de registro de notas aquí.</div>
+  <div class="card bg-dark shadow border-secondary">
+    <div class="card-body">
+      <form method="post" id="grade-form">
+        {% csrf_token %}
+
+        <div class="mb-3">
+          <label for="id_student" class="form-label">Estudiante:</label>
+          <select name="student" id="id_student" class="form-control">
+            <option value="">Selecciona un estudiante</option>
+            {% for s in student_options %}
+              <option value="{{ s.id }}" data-courses="{{ s.courses|join:"," }}" {% if selected_student_id and selected_student_id == s.id|stringformat:"s" %}selected{% endif %}>{{ s.label }} ({{ s.username }})</option>
+            {% endfor %}
+          </select>
+          {% if form.student.errors %}
+            <div class="text-danger small">{{ form.student.errors|striptags }}</div>
+          {% endif %}
+        </div>
+
+        <div class="mb-3">
+          {{ form.subject.label_tag }}
+          {{ form.subject }}
+          {% if form.subject.errors %}
+            <div class="text-danger small">{{ form.subject.errors|striptags }}</div>
+          {% endif %}
+        </div>
+
+        <div class="mb-3">
+          {{ form.value.label_tag }}
+          {{ form.value }}
+          {% if form.value.errors %}
+            <div class="text-danger small">{{ form.value.errors|striptags }}</div>
+          {% endif %}
+        </div>
+
+        <div class="mb-3">
+          {{ form.grade_type.label_tag }}
+          {{ form.grade_type }}
+          {% if form.grade_type.errors %}
+            <div class="text-danger small">{{ form.grade_type.errors|striptags }}</div>
+          {% endif %}
+        </div>
+
+        <div class="mb-3">
+          {{ form.weight.label_tag }}
+          {{ form.weight }}
+          {% if form.weight.errors %}
+            <div class="text-danger small">{{ form.weight.errors|striptags }}</div>
+          {% endif %}
+        </div>
+
+        {% if form.non_field_errors %}
+          <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+        {% endif %}
+
+        <button class="btn btn-primary" type="submit"><i class="fas fa-save"></i> Guardar</button>
+        <a href="{% url 'academics:grades_list' %}" class="btn btn-outline-light ms-2">Cancelar</a>
+      </form>
+
+      <script>
+        (function(){
+          const subjectEl = document.getElementById('id_subject');
+          const studentEl = document.getElementById('id_student');
+
+          function filterStudents(){
+            const selSubject = subjectEl ? subjectEl.value : '';
+            // parse mapping provided by view
+            let subjMap = {};
+            try{ subjMap = JSON.parse('{{ subject_course_map_json|escapejs }}'); }catch(e){ subjMap = {}; }
+            for(const opt of studentEl.options){
+              if(!opt.value) continue;
+              const courses = opt.getAttribute('data-courses');
+              if(!selSubject){
+                opt.style.display = '';
+                opt.disabled = false;
+                continue;
+              }
+              const arr = courses ? courses.split(',').map(s=>s.trim()).filter(Boolean) : [];
+              // find course id for selected subject
+              const subjCourse = subjMap[selSubject] || '';
+              const match = subjCourse ? (arr.indexOf(subjCourse) !== -1) : false;
+              if(match){
+                opt.style.display = '';
+                opt.disabled = false;
+              } else {
+                opt.style.display = 'none';
+                opt.disabled = true;
+                if(studentEl.value === opt.value){ studentEl.value = ''; }
+              }
+            }
+          }
+
+          if(subjectEl){
+            subjectEl.addEventListener('change', filterStudents);
+            filterStudents();
+          }
+        })();
+      </script>
+      <style>
+        /* Contrast fixes for grade form */
+        #grade-form .form-label { color: #eef6ff; }
+        #grade-form .form-text { color: rgba(230,238,248,0.85); }
+        #grade-form .form-control { background: #2b2f33; color: #f6fbff; border-color: rgba(255,255,255,0.06); }
+        #grade-form select.form-control { color: #f6fbff; }
+        #grade-form .text-danger { color: #ffb4b4; }
+      </style>
+    </div>
+  </div>
 </div>
 {% endblock %}

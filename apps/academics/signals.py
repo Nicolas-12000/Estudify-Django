@@ -10,7 +10,18 @@ def notify_student_on_grade_creation(sender, instance, created, **kwargs):
     if created:
         try:
             from apps.notifications.tasks import send_grade_notification_email
-            send_grade_notification_email.delay(instance.id)
+            # Prefer asynchronous enqueue via Celery when available; fall back to
+            # synchronous execution so developers without a running worker still
+            # receive notifications during local testing.
+            try:
+                send_grade_notification_email.delay(instance.id)
+            except Exception:
+                # Fallback: call the task function synchronously
+                try:
+                    send_grade_notification_email(instance.id)
+                except Exception:
+                    # swallow to avoid interrupting the save flow
+                    pass
         except Exception:
             # Si no hay Celery o falla, continuar sin interrumpir
             pass

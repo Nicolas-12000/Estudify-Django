@@ -43,7 +43,7 @@
         </div>
       </div>
 
-      <a href="{% url 'academics:subject_list' %}" class="stat-box stat-blue">
+      <a href="{% url 'admin_panel:subject_list' %}" class="stat-box stat-blue">
         <div class="stat-icon">
           <i class="fas fa-book"></i>
         </div>
@@ -65,6 +65,17 @@
     </div>
 
     <!-- Subjects Section -->
+    <div class="mb-3">
+      <div class="d-grid gap-2 d-md-flex">
+        <a href="{% url 'academics:import_grades' %}" class="btn btn-sm btn-outline-light flex-fill">Importar notas (.xlsx)</a>
+        <a href="{% url 'reports:export_grades_excel' %}?teacher_only=1" class="btn btn-sm btn-outline-light flex-fill">Exportar notas (Excel)</a>
+        <a href="{% url 'reports:export_attendance_excel' %}?teacher_only=1" class="btn btn-sm btn-outline-light flex-fill">Exportar asistencias (Excel)</a>
+        <a href="{% url 'academics:attendance_create' %}" class="btn btn-sm btn-outline-success flex-fill">Registrar Asistencia</a>
+        <a href="{% url 'academics:attendance_bulk' %}" class="btn btn-sm btn-outline-warning flex-fill">Asistencia masiva</a>
+        <a href="{% url 'academics:grades_create' %}" class="btn btn-sm btn-outline-primary flex-fill">Agregar Calificación</a>
+      </div>
+    </div>
+
     <div class="info-section-card">
       <div class="info-header">
         <i class="fas fa-book-open"></i>
@@ -82,6 +93,78 @@
         <p class="info-text mt-2">No tienes materias asignadas.</p>
       {% endif %}
     </div>
+
+    <!-- Cursos y Estudiantes por curso -->
+    <div class="info-section-card mt-4">
+      <div class="info-header">
+        <i class="fas fa-users"></i>
+        <h2>Estudiantes por Curso</h2>
+      </div>
+      {% if course_students %}
+        <div class="accordion" id="coursesAccordion">
+          {% for cs in course_students %}
+            <div class="accordion-item bg-dark border-secondary mb-2">
+              <h2 class="accordion-header" id="heading-{{ cs.course.id }}">
+                <button class="accordion-button collapsed bg-dark text-white" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-{{ cs.course.id }}" aria-expanded="false" aria-controls="collapse-{{ cs.course.id }}">
+                  {{ cs.course.name }} <span class="badge bg-secondary ms-2">{{ cs.count }}</span>
+                </button>
+              </h2>
+              <div id="collapse-{{ cs.course.id }}" class="accordion-collapse collapse" aria-labelledby="heading-{{ cs.course.id }}" data-bs-parent="#coursesAccordion">
+                <div class="accordion-body">
+                  {% if cs.students %}
+                    <ul class="list-group list-group-flush">
+                      {% for st in cs.students %}
+                        <li class="list-group-item bg-transparent border-0 py-1">
+                          <i class="fas fa-user-graduate text-cyan me-2"></i> {{ st.get_full_name }} <small class="text-muted">({{ st.username }})</small>
+                        </li>
+                      {% endfor %}
+                    </ul>
+                  {% else %}
+                    <p class="text-muted">No hay estudiantes inscritos en este curso.</p>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p class="info-text mt-2">No hay cursos con estudiantes inscritos.</p>
+      {% endif %}
+    </div>
+
+      <!-- Charts Section -->
+      <div class="info-section-card mt-4">
+        <div class="info-header">
+          <i class="fas fa-chart-area"></i>
+          <h2>Estadísticas</h2>
+        </div>
+        <div class="row gy-3 mt-3">
+          <div class="col-md-6">
+            <div class="card bg-dark border-secondary p-3">
+              <h5 class="text-white">Rendimiento promedio por materia</h5>
+              <canvas id="chart-subject-performance" height="200"></canvas>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="card bg-dark border-secondary p-3">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <h5 class="text-white mb-0">Asistencia mensual (tasa %)</h5>
+                <div class="d-flex gap-2 align-items-center">
+                  <label class="text-muted mb-0" for="attendance-year">Año</label>
+                  <select id="attendance-year" class="form-select form-select-sm"></select>
+                </div>
+              </div>
+              <div id="attendance-chart-wrap">
+                <div id="attendance-spinner" class="text-center py-4" style="display:none">
+                  <div class="spinner-border text-light" role="status"><span class="visually-hidden">Cargando...</span></div>
+                </div>
+                <canvas id="chart-attendance-monthly" height="200"></canvas>
+                <div id="attendance-empty" class="text-center text-muted mt-2" style="display:none">No hay datos para este año.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
   </div>
 </div>
 
@@ -91,6 +174,7 @@
     min-height: 100vh;
     margin: 0;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    color: #eef6ff; /* default light text for contrast */
   }
 
   .estudify-wrapper {
@@ -240,6 +324,13 @@
     font-size: 2rem;
   }
 
+  /* keep canvas responsive */
+  #chart-subject-performance, #chart-attendance-monthly {
+    width: 100% !important;
+    max-height: 320px;
+  }
+  }
+
   .stat-cyan .stat-icon i { color: #06b6d4; }
   .stat-indigo .stat-icon i { color: #6366f1; }
   .stat-blue .stat-icon i { color: #3b82f6; }
@@ -294,11 +385,23 @@
   .list-group-item {
     background: transparent !important;
     border-color: rgba(255, 255, 255, 0.08) !important;
+    color: #f1f7ff; /* ensure list items are readable */
   }
 
   .text-cyan {
     color: #06b6d4;
   }
+
+  /* Accordion and course list readability */
+  .accordion-button,
+  .accordion-button * {
+    color: #eef6ff !important;
+  }
+  .accordion-body { color: #e6eef8; }
+  .info-text, .text-muted { color: rgba(230,238,248,0.8); }
+
+  /* Buttons / links contrast */
+  .stat-box .stat-label, .profile-meta, .profile-badge { color: rgba(230,238,248,0.95); }
 
   @media (max-width: 768px) {
     .profile-header-card {
@@ -316,4 +419,97 @@
     }
   }
 </style>
+<!-- Chart.js CDN and scripts -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  (function(){
+    // Helpers
+    function createBarChart(ctx, labels, data, label, color){
+      return new Chart(ctx, {
+        type: 'bar',
+        data: { labels: labels, datasets: [{ label: label, data: data, backgroundColor: color }] },
+        options: { responsive: true, scales: { y: { beginAtZero: true } } }
+      });
+    }
+
+    function createLineChart(ctx, labels, data, label, borderColor, bgColor){
+      return new Chart(ctx, {
+        type: 'line',
+        data: { labels: labels, datasets: [{ label: label, data: data, borderColor: borderColor, backgroundColor: bgColor, fill: true }] },
+        options: { responsive: true, scales: { y: { beginAtZero: true, max: 100 } } }
+      });
+    }
+
+    // Subject performance chart (once)
+    let subjectChart = null;
+    fetch('{% url "academics:stats_subject_performance" %}').then(r=>r.json()).then(json=>{
+      const ctx = document.getElementById('chart-subject-performance').getContext('2d');
+      subjectChart = createBarChart(ctx, json.labels, json.data, 'Promedio', 'rgba(59,130,246,0.7)');
+      if(!json.labels || json.labels.length === 0){
+        // show empty message if desired
+      }
+    }).catch(err=>{
+      console.error('Error cargando datos de rendimiento:', err);
+    });
+
+    // Attendance monthly chart (reloadable by year)
+    let attendanceChart = null;
+    const attendanceYearEl = document.getElementById('attendance-year');
+    const spinner = document.getElementById('attendance-spinner');
+    const emptyMsg = document.getElementById('attendance-empty');
+
+    function populateYearSelect(rangeBack=5){
+      const now = new Date();
+      const current = now.getFullYear();
+      attendanceYearEl.innerHTML = '';
+      for(let y = current; y >= current - rangeBack; y--){
+        const opt = document.createElement('option'); opt.value = y; opt.text = y; attendanceYearEl.appendChild(opt);
+      }
+      attendanceYearEl.value = current;
+    }
+
+    function showSpinner(on){ spinner.style.display = on ? 'block' : 'none'; }
+
+    function fetchAttendance(year){
+      showSpinner(true); emptyMsg.style.display = 'none';
+      const url = '{% url "academics:stats_attendance_monthly" %}' + '?year=' + encodeURIComponent(year);
+      fetch(url).then(r=>{
+        if(!r.ok) throw new Error('HTTP ' + r.status);
+        return r.json();
+      }).then(json=>{
+        showSpinner(false);
+        const hasData = Array.isArray(json.data) && json.data.some(v => v > 0);
+        if(!hasData){
+          // hide canvas and show empty
+          emptyMsg.style.display = 'block';
+          if(attendanceChart){ attendanceChart.destroy(); attendanceChart = null; }
+          return;
+        }
+
+        emptyMsg.style.display = 'none';
+        const ctx = document.getElementById('chart-attendance-monthly').getContext('2d');
+        if(attendanceChart){
+          attendanceChart.data.labels = json.labels;
+          attendanceChart.data.datasets[0].data = json.data;
+          attendanceChart.update();
+        } else {
+          attendanceChart = createLineChart(ctx, json.labels, json.data, 'Tasa de asistencia (%)', 'rgba(16,185,129,0.9)', 'rgba(16,185,129,0.25)');
+        }
+      }).catch(err=>{
+        showSpinner(false);
+        console.error('Error cargando datos de asistencia:', err);
+        emptyMsg.style.display = 'block';
+      });
+    }
+
+    // init
+    populateYearSelect(5);
+    fetchAttendance(document.getElementById('attendance-year').value);
+
+    attendanceYearEl.addEventListener('change', function(){
+      fetchAttendance(this.value);
+    });
+
+  })();
+</script>
 {% endblock %}

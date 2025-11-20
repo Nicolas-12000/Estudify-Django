@@ -3,7 +3,121 @@
 {% block content %}
 <div class="container py-4">
   <h2 class="mb-4"><i class="fas fa-plus"></i> Registrar Asistencia</h2>
-  <!-- Aquí va tu formulario Django normalmente -->
-  <div class="alert alert-secondary">Próximamente el formulario de registro de asistencias aquí.</div>
+  <div class="card bg-dark shadow border-secondary">
+    <div class="card-body">
+      <form method="post" id="attendance-form">
+        {% csrf_token %}
+
+        <div class="mb-3">
+          <label for="id_student" class="form-label">Estudiante:</label>
+          <select name="student" id="id_student" class="form-control">
+            <option value="">Selecciona un estudiante</option>
+            {% for s in student_options %}
+              <option value="{{ s.id }}" data-courses="{{ s.courses|join:"," }}" {% if selected_student_id and selected_student_id == s.id|stringformat:"s" %}selected{% endif %}>{{ s.label }} ({{ s.username }})</option>
+            {% endfor %}
+          </select>
+          {% if form.student.errors %}
+            <div class="text-danger small">{{ form.student.errors|striptags }}</div>
+          {% endif %}
+          {% if form.student.help_text %}
+            <div class="form-text">{{ form.student.help_text }}</div>
+          {% endif %}
+        </div>
+
+        <div class="mb-3">
+          {{ form.course.label_tag }}
+          {{ form.course }}
+          {% if form.course.errors %}
+            <div class="text-danger small">{{ form.course.errors|striptags }}</div>
+          {% endif %}
+          {% if form.course.help_text %}
+            <div class="form-text">{{ form.course.help_text }}</div>
+          {% endif %}
+        </div>
+
+        <div class="mb-3">
+          {{ form.date.label_tag }}
+          {{ form.date }}
+          {% if form.date.errors %}
+            <div class="text-danger small">{{ form.date.errors|striptags }}</div>
+          {% endif %}
+        </div>
+
+        <div class="mb-3">
+          {{ form.status.label_tag }}
+          {{ form.status }}
+          {% if form.status.errors %}
+            <div class="text-danger small">{{ form.status.errors|striptags }}</div>
+          {% endif %}
+        </div>
+
+        <div class="mb-3">
+          {{ form.notes.label_tag }}
+          {{ form.notes }}
+          {% if form.notes.errors %}
+            <div class="text-danger small">{{ form.notes.errors|striptags }}</div>
+          {% endif %}
+        </div>
+
+        {% if form.non_field_errors %}
+          <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+        {% endif %}
+
+        <button class="btn btn-primary" type="submit"><i class="fas fa-save"></i> Guardar</button>
+        <a href="{% url 'academics:attendance_list' %}" class="btn btn-outline-light ms-2">Cancelar</a>
+      </form>
+
+      <script>
+        (function(){
+          const courseEl = document.getElementById('id_course');
+          const studentEl = document.getElementById('id_student');
+
+          function filterStudents(){
+            const selCourse = courseEl ? courseEl.value : '';
+            for(const opt of studentEl.options){
+              if(!opt.value) continue; // placeholder
+              const courses = opt.getAttribute('data-courses');
+              if(!selCourse){
+                opt.style.display = '';
+                opt.disabled = false;
+                continue;
+              }
+              if(!courses){
+                opt.style.display = 'none';
+                opt.disabled = true;
+                // if currently selected, clear
+                if(studentEl.value === opt.value){ studentEl.value = ''; }
+                continue;
+              }
+              const arr = courses.split(',').map(s=>s.trim()).filter(Boolean);
+              if(arr.indexOf(selCourse) !== -1){
+                opt.style.display = '';
+                opt.disabled = false;
+              } else {
+                opt.style.display = 'none';
+                opt.disabled = true;
+                if(studentEl.value === opt.value){ studentEl.value = ''; }
+              }
+            }
+          }
+
+          if(courseEl){
+            courseEl.addEventListener('change', filterStudents);
+            // initial run
+            filterStudents();
+          }
+        })();
+      </script>
+      <style>
+        /* Improve contrast for dark backgrounds */
+        #attendance-form .form-label { color: #eef6ff; }
+        #attendance-form .form-text { color: rgba(230,238,248,0.85); }
+        #attendance-form .form-control { background: #2b2f33; color: #f6fbff; border-color: rgba(255,255,255,0.06); }
+        #attendance-form select.form-control { color: #f6fbff; }
+        #attendance-form .text-danger { color: #ffb4b4; }
+        #attendance-form .list-group-item { background: transparent; color: #eef6ff; }
+      </style>
+    </div>
+  </div>
 </div>
 {% endblock %}

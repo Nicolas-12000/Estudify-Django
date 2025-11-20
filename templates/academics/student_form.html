@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}{% if create %}Crear Estudiante{% else %}Editar Estudiante{% endif %}{% endblock %}
+{% block content %}
+<div class="estudify-wrapper">
+  <div class="container py-4">
+    <div class="info-section-card">
+      <div class="info-header">
+        <i class="fas fa-user-graduate"></i>
+        <h2>{% if create %}Crear Estudiante{% else %}Editar Estudiante{% endif %}</h2>
+      </div>
+      <div class="form-container p-4">
+        <form method="post" enctype="multipart/form-data">
+          {% csrf_token %}
+          <div class="mb-4">
+            {{ form.as_p }}
+          </div>
+          <div class="d-grid">
+            <button type="submit" class="btn-submit">
+              {% if create %}<i class="fas fa-user-plus me-2"></i> Crear Estudiante{% else %}<i class="fas fa-save me-2"></i> Guardar cambios{% endif %}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

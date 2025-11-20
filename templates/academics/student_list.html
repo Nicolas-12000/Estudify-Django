@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}Mis Estudiantes - Estudify{% endblock %}
+{% block content %}
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Mis Estudiantes</h2>
+    <div>
+      {% if show_inactive %}
+        <a class="btn btn-sm btn-outline-light" href="?">Mostrar activos</a>
+      {% else %}
+        <a class="btn btn-sm btn-outline-light" href="?show_inactive=1">Incluir inactivos</a>
+      {% endif %}
+    </div>
+  </div>
+
+  {% if students %}
+    <div class="table-responsive">
+      <table class="table table-dark table-striped">
+        <thead>
+          <tr>
+            <th>Usuario</th>
+            <th>Nombre</th>
+            <th>Email</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for s in students %}
+            <tr>
+              <td><code>{{ s.username }}</code></td>
+              <td>{{ s.get_full_name }}</td>
+              <td>{{ s.email }}</td>
+              <td>
+                {% if s.is_active %}
+                  <span class="badge bg-success">Activo</span>
+                {% else %}
+                  <span class="badge bg-secondary">Inactivo</span>
+                {% endif %}
+              </td>
+              <td>
+                {% if user.is_authenticated and user.is_admin_role or user.is_authenticated and user.is_teacher %}
+                  <a class="btn btn-sm btn-outline-light" href="{% url 'reports:download_boletin_pdf' s.id %}">
+                    <i class="fas fa-file-pdf"></i> Boletín
+                  </a>
+                {% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="alert alert-info">No se encontraron estudiantes.</div>
+  {% endif %}
+</div>
+{% endblock %}

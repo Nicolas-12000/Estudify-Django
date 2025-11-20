@@ -1,0 +1,141 @@
+Template audit report
+
+Template: templates\academics\attendance_form.html
+Provided keys: []
+Missing vars: ['field', 'form']
+
+Template: templates\academics\attendance_list.html
+Provided keys: []
+Missing vars: ['attendance']
+
+Template: templates\academics\grade_form.html
+Provided keys: []
+Missing vars: ['field', 'form']
+
+Template: templates\academics\grades_list.html
+Provided keys: []
+Missing vars: ['grade']
+
+Template: templates\academics\import_grades.html
+Provided keys: []
+Missing vars: ['error', 'form']
+
+Template: templates\academics\import_result.html
+Provided keys: []
+Missing vars: ['err', 'success_count']
+
+Template: templates\academics\student_form.html
+Provided keys: []
+Missing vars: ['form']
+
+Template: templates\academics\student_list.html
+Provided keys: []
+Missing vars: ['s']
+
+Template: templates\admin_panel\dashboard.html
+Provided keys: []
+Missing vars: ['course', 'total_courses', 'total_students', 'total_subjects', 'total_users', 'user']
+
+Template: templates\base.html
+Provided keys: []
+Missing vars: []
+
+Template: templates\components\footer.html
+Provided keys: []
+Missing vars: []
+
+Template: templates\components\head.html
+Provided keys: []
+Missing vars: []
+
+Template: templates\components\header.html
+Provided keys: []
+Missing vars: []
+
+Template: templates\components\messages.html
+Provided keys: []
+Missing vars: ['message']
+
+Template: templates\components\navbar.html
+Provided keys: []
+Missing vars: ['user']
+
+Template: templates\components\scripts.html
+Provided keys: []
+Missing vars: []
+
+Template: templates\core\panel_admin.html
+Provided keys: []
+Missing vars: ['total_students', 'total_teachers', 'total_users', 'u', 'user']
+
+Template: templates\core\panel_estudiante.html
+Provided keys: []
+Missing vars: ['c', 'courses_count', 'grades_summary', 'user']
+
+Template: templates\core\panel_profesor.html
+Provided keys: []
+Missing vars: ['s', 'students_count', 'subjects_count', 'user']
+
+Template: templates\courses\course_detail.html
+Provided keys: []
+Missing vars: ['course']
+
+Template: templates\courses\course_form.html
+Provided keys: []
+Missing vars: ['error', 'field', 'form']
+
+Template: templates\courses\course_list.html
+Provided keys: []
+Missing vars: ['course']
+
+Template: templates\emails\grade_notification.html
+Provided keys: []
+Missing vars: ['grade', 'student']
+
+Template: templates\emails\welcome.html
+Provided keys: []
+Missing vars: ['user']
+
+Template: templates\errors\400.html
+Provided keys: []
+Missing vars: []
+
+Template: templates\errors\403.html
+Provided keys: []
+Missing vars: []
+
+Template: templates\errors\404.html
+Provided keys: []
+Missing vars: []
+
+Template: templates\errors\500.html
+Provided keys: []
+Missing vars: []
+
+Template: templates\home.html
+Provided keys: []
+Missing vars: []
+
+Template: templates\reports\report_list.html
+Provided keys: []
+Missing vars: ['c']
+
+Template: templates\users\login.html
+Provided keys: []
+Missing vars: ['form', 'message']
+
+Template: templates\users\profile.html
+Provided keys: []
+Missing vars: ['form', 'message', 'profile']
+
+Template: templates\users\register.html
+Provided keys: []
+Missing vars: ['form']
+
+Template: templates\users\user_detail.html
+Provided keys: []
+Missing vars: ['user_obj']
+
+Template: templates\users\user_list.html
+Provided keys: []
+Missing vars: ['label', 'num', 'request', 'user', 'users', 'val']
