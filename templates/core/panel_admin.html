@@ -1,62 +1,346 @@
 {% extends "base.html" %}
 {% block title %}Panel Administrador{% endblock %}
 {% block content %}
-<div class="container py-5">
-  <h1 class="text-danger mb-4 fw-bold">
-    <i class="fas fa-tools"></i> Panel Administrador
-  </h1>
-  <div class="alert alert-info mb-4 shadow-sm">
-    <b>Bienvenido, {{ user.get_full_name }} (Admin)</b><br>
-    Tienes acceso total a la gestión académica del sistema.
-  </div>
-  <div class="row g-4 mb-4">
-    <div class="col-md-4">
-      <div class="card bg-dark border-danger text-center shadow h-100">
-        <div class="p-3">
-          <i class="fas fa-users fa-2x text-danger mb-2"></i>
-          <h4>Usuarios Totales</h4>
-          <p class="fs-4">{{ total_users|default:"—" }}</p>
-        </div>
+<style>
+  .admin-wrapper {
+    min-height: 100vh;
+    padding: 20px 0;
+  }
+
+  /* Header del Panel */
+  .admin-header-card {
+    background: linear-gradient(135deg, #1e1e3f 0%, #2d2d5a 100%);
+    border-radius: 24px;
+    padding: 2.5rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  .admin-header-card h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: white;
+    margin: 0 0 1rem 0;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .admin-header-card h1 i {
+    color: #ec4899;
+  }
+
+  .admin-alert {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 1.25rem;
+    color: white;
+    margin: 0;
+  }
+
+  .admin-alert b {
+    font-weight: 700;
+    display: block;
+    margin-bottom: 0.5rem;
+  }
+
+  /* Stats Grid */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.25rem;
+    margin-bottom: 2rem;
+  }
+
+  .stat-card {
+    background: linear-gradient(135deg, #1e1e3f 0%, #2a2a4f 100%);
+    border-radius: 16px;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    position: relative;
+    overflow: hidden;
+    min-height: 180px;
+  }
+
+  .stat-card::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    transition: width 0.3s ease;
+  }
+
+  .stat-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+
+  .stat-card:hover::before {
+    width: 8px;
+  }
+
+  .stat-card-red::before { background: linear-gradient(180deg, #ef4444, #dc2626); }
+  .stat-card-green::before { background: linear-gradient(180deg, #10b981, #059669); }
+  .stat-card-blue::before { background: linear-gradient(180deg, #3b82f6, #2563eb); }
+
+  .stat-card-icon {
+    width: 80px;
+    height: 80px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1rem;
+    transition: transform 0.3s ease;
+  }
+
+  .stat-card:hover .stat-card-icon {
+    transform: scale(1.1) rotate(-5deg);
+  }
+
+  .stat-card-red .stat-card-icon { background: rgba(239, 68, 68, 0.15); }
+  .stat-card-green .stat-card-icon { background: rgba(16, 185, 129, 0.15); }
+  .stat-card-blue .stat-card-icon { background: rgba(59, 130, 246, 0.15); }
+
+  .stat-card-icon i {
+    font-size: 2.5rem;
+  }
+
+  .stat-card-red .stat-card-icon i { color: #ef4444; }
+  .stat-card-green .stat-card-icon i { color: #10b981; }
+  .stat-card-blue .stat-card-icon i { color: #3b82f6; }
+
+  .stat-card h4 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: white;
+    margin-bottom: 0.5rem;
+  }
+
+  .stat-card p {
+    font-size: 2rem;
+    font-weight: 700;
+    color: white;
+    margin: 0;
+  }
+
+  /* Botón de Acción */
+  .action-bar {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 2rem;
+  }
+
+  .btn-register {
+    background: linear-gradient(135deg, #ec4899, #ef4444);
+    border: none;
+    color: white;
+    padding: 0.875rem 2rem;
+    font-size: 1.1rem;
+    font-weight: 700;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 16px rgba(236, 72, 153, 0.4);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .btn-register:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(236, 72, 153, 0.6);
+    color: white;
+  }
+
+  /* Card de Usuarios Recientes */
+  .recent-users-card {
+    background: linear-gradient(135deg, #1e1e3f 0%, #2d2d5a 100%);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  }
+
+  .recent-users-header {
+    background: linear-gradient(135deg, #1e1e3f 0%, #2a2a4f 100%);
+    padding: 1.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  .recent-users-header h5 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: white;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .recent-users-header i {
+    color: #ec4899;
+    font-size: 1.5rem;
+  }
+
+  .recent-users-body {
+    padding: 1.5rem;
+  }
+
+  .user-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .user-item {
+    background: rgba(30, 30, 63, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    padding: 1rem 1.25rem;
+    margin-bottom: 0.75rem;
+    color: white;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    transition: all 0.3s ease;
+  }
+
+  .user-item:last-child {
+    margin-bottom: 0;
+  }
+
+  .user-item:hover {
+    background: rgba(30, 30, 63, 0.7);
+    border-color: rgba(236, 72, 153, 0.3);
+    transform: translateX(5px);
+  }
+
+  .user-item i {
+    color: #ec4899;
+    font-size: 1.1rem;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 2rem;
+    color: rgba(255, 255, 255, 0.5);
+    font-style: italic;
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .admin-header-card {
+      padding: 2rem;
+    }
+
+    .admin-header-card h1 {
+      font-size: 2rem;
+      flex-direction: column;
+      text-align: center;
+      gap: 0.5rem;
+    }
+
+    .stats-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .action-bar {
+      justify-content: center;
+    }
+
+    .btn-register {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+</style>
+
+<div class="admin-wrapper">
+  <div class="container py-4">
+    <!-- Header del Panel -->
+    <div class="admin-header-card">
+      <h1>
+        <i class="fas fa-tools"></i>
+        Panel Administrador
+      </h1>
+      <div class="admin-alert">
+        <b>Bienvenido, {{ user.get_full_name }} (Admin)</b>
+        Tienes acceso total a la gestión académica del sistema.
       </div>
     </div>
-    <div class="col-md-4">
-      <div class="card bg-dark border-success text-center shadow h-100">
-        <div class="p-3">
-          <i class="fas fa-chalkboard-teacher fa-2x text-success mb-2"></i>
-          <h4>Profesores</h4>
-          <p class="fs-4">{{ total_teachers|default:"—" }}</p>
+
+    <!-- Stats Grid -->
+    <div class="stats-grid">
+      <div class="stat-card stat-card-red">
+        <div class="stat-card-icon">
+          <i class="fas fa-users"></i>
         </div>
+        <h4>Usuarios Totales</h4>
+        <p>{{ total_users|default:"—" }}</p>
+      </div>
+
+      <div class="stat-card stat-card-green">
+        <div class="stat-card-icon">
+          <i class="fas fa-chalkboard-teacher"></i>
+        </div>
+        <h4>Profesores</h4>
+        <p>{{ total_teachers|default:"—" }}</p>
+      </div>
+
+      <div class="stat-card stat-card-blue">
+        <div class="stat-card-icon">
+          <i class="fas fa-user-graduate"></i>
+        </div>
+        <h4>Estudiantes</h4>
+        <p>{{ total_students|default:"—" }}</p>
       </div>
     </div>
-    <div class="col-md-4">
-      <div class="card bg-dark border-primary text-center shadow h-100">
-        <div class="p-3">
-          <i class="fas fa-user-graduate fa-2x text-primary mb-2"></i>
-          <h4>Estudiantes</h4>
-          <p class="fs-4">{{ total_students|default:"—" }}</p>
-        </div>
+
+    <!-- Botón de Acción -->
+    <div class="action-bar">
+      <a href="{% url 'users:register' %}" class="btn-register">
+        <i class="fas fa-user-plus"></i> 
+        Registrar usuario
+      </a>
+    </div>
+
+    <!-- Card de Usuarios Recientes -->
+    <div class="recent-users-card">
+      <div class="recent-users-header">
+        <h5>
+          <i class="fas fa-clock"></i>
+          Usuarios Recientes
+        </h5>
       </div>
-    </div>
-  </div>
-  <div class="d-flex justify-content-end mb-3">
-    <a href="{% url 'users:register' %}" class="btn btn-danger btn-lg px-4 shadow-sm"><i class="fas fa-user-plus"></i> Registrar usuario</a>
-  </div>
-  <div class="card shadow bg-dark border-secondary mt-4">
-    <div class="card-header text-white bg-secondary fw-bold">
-      <i class="fas fa-clock"></i> Usuarios Recientes
-    </div>
-    <div class="card-body">
-      {% if recent_users %}
-        <ul class="list-group list-group-flush">
-          {% for u in recent_users %}
-            <li class="list-group-item bg-dark text-white">
-              <i class="fas fa-user"></i> {{ u.username }} - {{ u.get_full_name }}
-            </li>
-          {% endfor %}
-        </ul>
-      {% else %}
-        <p class="text-muted">No hay usuarios recientes.</p>
-      {% endif %}
+      <div class="recent-users-body">
+        {% if recent_users %}
+          <ul class="user-list">
+            {% for u in recent_users %}
+              <li class="user-item">
+                <i class="fas fa-user"></i>
+                <span>{{ u.username }} - {{ u.get_full_name }}</span>
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <div class="empty-state">
+            <i class="fas fa-inbox" style="font-size: 3rem; margin-bottom: 1rem; display: block; opacity: 0.3;"></i>
+            No hay usuarios recientes.
+          </div>
+        {% endif %}
+      </div>
     </div>
   </div>
 </div>

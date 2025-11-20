@@ -1,14 +1,255 @@
 {% extends "base.html" %}
-{% block title %}Registrar Usuario{% endblock %}
+{% block title %}Registrar Usuario - Estudify{% endblock %}
 {% block content %}
-<div class="container py-5">
-  <h2 class="mb-4">Registrar Usuario</h2>
-  <form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button class="btn btn-primary btn-lg" type="submit">
-      <i class="fas fa-user-plus"></i> Registrar
-    </button>
-  </form>
+<div class="estudify-wrapper">
+  <div class="container py-4">
+    <!-- Header Card -->
+    <div class="profile-header-card mb-4">
+      <div class="profile-avatar">
+        <div class="avatar-circle">
+          <i class="fas fa-user-plus"></i>
+        </div>
+      </div>
+      <div class="profile-info">
+        <h1 class="profile-name">Registrar Nuevo Usuario</h1>
+        <div class="profile-badge">
+          <i class="fas fa-shield-alt"></i> Plataforma Integral Estudify
+        </div>
+        <div class="profile-meta">
+          <span><i class="fas fa-lightbulb"></i> <strong>Consejo:</strong> <em>Un buen comienzo es la mitad del camino.</em></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Form Section -->
+    <div class="info-section-card">
+      <div class="info-header">
+        <i class="fas fa-user-edit"></i>
+        <h2>Datos del Nuevo Usuario</h2>
+      </div>
+      <div class="form-container p-4">
+        <form method="post">
+          {% csrf_token %}
+          <div class="mb-4">
+            {{ form.as_p }}
+          </div>
+          <div class="d-grid">
+            <button type="submit" class="btn-submit">
+              <i class="fas fa-user-plus me-2"></i> Registrar Usuario
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
 </div>
+
+<style>
+  body {
+    background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+    min-height: 100vh;
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+
+  .estudify-wrapper {
+    min-height: 100vh;
+    padding: 20px 0;
+  }
+
+  /* Profile Header Card */
+  .profile-header-card {
+    background: linear-gradient(135deg, #1e1e3f 0%, #2d2d5a 100%);
+    border-radius: 24px;
+    padding: 2.5rem;
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  .profile-avatar {
+    flex-shrink: 0;
+  }
+
+  .avatar-circle {
+    width: 120px;
+    height: 120px;
+    background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    box-shadow: 0 4px 16px rgba(139, 92, 246, 0.4);
+  }
+
+  .avatar-circle i {
+    font-size: 3.5rem;
+    color: white;
+  }
+
+  .profile-info {
+    flex: 1;
+  }
+
+  .profile-name {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: white;
+    margin: 0 0 0.75rem 0;
+  }
+
+  .profile-badge {
+    display: inline-block;
+    background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+    color: white;
+    padding: 0.5rem 1.25rem;
+    border-radius: 50px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+  }
+
+  .profile-badge i {
+    margin-right: 0.5rem;
+  }
+
+  .profile-meta {
+    display: flex;
+    gap: 1.5rem;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.95rem;
+    flex-wrap: wrap;
+  }
+
+  .profile-meta i {
+    color: #fbbf24;
+    margin-right: 0.5rem;
+  }
+
+  /* Info Section (Form) */
+  .info-section-card {
+    background: linear-gradient(135deg, #1e1e3f 0%, #2d2d5a 100%);
+    border-radius: 16px;
+    padding: 0;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  }
+
+  .info-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  .info-header i {
+    font-size: 1.75rem;
+    color: #8b5cf6;
+  }
+
+  .info-header h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: white;
+    margin: 0;
+  }
+
+  .form-container {
+    background: rgba(30, 30, 63, 0.6);
+  }
+
+  /* Form styling */
+  form p {
+    margin-bottom: 1.25rem;
+  }
+
+  form label {
+    display: block;
+    font-weight: 600;
+    color: white;
+    margin-bottom: 0.5rem;
+    font-size: 0.95rem;
+  }
+
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  select,
+  textarea {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    background: rgba(0, 0, 0, 0.2);
+    color: white;
+    font-size: 1rem;
+    transition: all 0.25s ease;
+    box-sizing: border-box;
+  }
+
+  input:focus,
+  select:focus,
+  textarea:focus {
+    outline: none;
+    border-color: #8b5cf6;
+    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2);
+    background: rgba(0, 0, 0, 0.3);
+  }
+
+  .errorlist {
+    color: #f87171;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+    list-style: none;
+    padding-left: 0;
+  }
+
+  /* Submit Button */
+  .btn-submit {
+    background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+    color: white;
+    border: none;
+    padding: 1rem 1.5rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    box-shadow: 0 4px 16px rgba(139, 92, 246, 0.3);
+  }
+
+  .btn-submit:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(139, 92, 246, 0.5);
+    background: linear-gradient(135deg, #7c3aed, #6d28d9);
+  }
+
+  .btn-submit:active {
+    transform: translateY(0);
+  }
+
+  .btn-submit i {
+    font-size: 1.25rem;
+  }
+
+  @media (max-width: 768px) {
+    .profile-header-card {
+      flex-direction: column;
+      text-align: center;
+      padding: 2rem;
+    }
+
+    .profile-name {
+      font-size: 1.75rem;
+    }
+  }
+</style>
 {% endblock %}

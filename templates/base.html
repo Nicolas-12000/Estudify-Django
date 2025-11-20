@@ -1,9 +1,34 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Estudify - Gestión Académica{% endblock %}</title>
     
     {% include 'components/head.html' %}
+    
+    <!-- Estilo global Estudify (solo fondo y fuente base) -->
+    <style>
+        body {
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            min-height: 100vh;
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            color: #e2e8f0;
+        }
+
+        /* Asegurar que el contenido no quede debajo del navbar fijo (si lo usas) */
+        main {
+            padding-top: 1rem;
+            padding-bottom: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            main {
+                padding-top: 0.5rem;
+            }
+        }
+    </style>
 </head>
 <body>
     <!-- Navigation -->
@@ -12,10 +37,12 @@
     <!-- Messages -->
     {% include 'components/messages.html' %}
 
-    <!-- Main Content -->
-    <main class="container my-4">
-        {% block content %}{% endblock %}
-    </main>
+    <!-- Main Content Wrapper: ahora con el contenedor estilo Estudify -->
+    <div class="estudify-wrapper">
+        <main class="container my-4 py-2">
+            {% block content %}{% endblock %}
+        </main>
+    </div>
 
     <!-- Footer -->
     {% include 'components/footer.html' %}

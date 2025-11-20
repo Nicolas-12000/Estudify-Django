@@ -1,79 +1,346 @@
 {% extends "base.html" %}
 {% block title %}Mi Perfil - Estudify{% endblock %}
 {% block content %}
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card shadow border-secondary bg-dark">
-                <div class="card-header bg-danger text-white">
-                    <h3 class="mb-0"><i class="fas fa-user-circle"></i> Mi Perfil</h3>
-                </div>
-                <div class="card-body">
-                    <form method="post">
-                        {% csrf_token %}
-                        {% if messages %}
-                            {% for message in messages %}
-                                <div class="alert alert-{{ message.tags }} alert-dismissible fade show my-2">
-                                    {{ message }}
-                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                                </div>
-                            {% endfor %}
-                        {% endif %}
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label for="first_name" class="form-label text-light"><i class="fas fa-user"></i> Nombre</label>
-                                {{ form.first_name }}
-                            </div>
-                            <div class="col-md-6">
-                                <label for="last_name" class="form-label text-light"><i class="fas fa-user"></i> Apellido</label>
-                                {{ form.last_name }}
-                            </div>
-                        </div>
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label for="username" class="form-label text-light"><i class="fas fa-user-tag"></i> Usuario</label>
-                                <input type="text" class="form-control bg-dark-secondary text-light" disabled value="{{ profile.user.username }}">
-                            </div>
-                            <div class="col-md-6">
-                                <label for="email" class="form-label text-light"><i class="fas fa-envelope"></i> Email</label>
-                                {{ form.email }}
-                            </div>
-                        </div>
-                        <hr class="border-danger">
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label for="phone" class="form-label text-light"><i class="fas fa-phone"></i> Teléfono</label>
-                                {{ form.phone }}
-                            </div>
-                            <div class="col-md-6">
-                                <label for="date_of_birth" class="form-label text-light"><i class="fas fa-calendar"></i> Fecha de nacimiento</label>
-                                {{ form.date_of_birth }}
-                            </div>
-                        </div>
-                        <div class="mb-3">
-                            <label for="bio" class="form-label text-light"><i class="fas fa-info-circle"></i> Bio</label>
-                            {{ form.bio }}
-                        </div>
-                        <div class="mb-3">
-                            <label for="address" class="form-label text-light"><i class="fas fa-home"></i> Dirección</label>
-                            {{ form.address }}
-                        </div>
-                        <div class="mb-3">
-                            <label for="city" class="form-label text-light"><i class="fas fa-city"></i> Ciudad</label>
-                            {{ form.city }}
-                        </div>
-                        <div class="mb-3">
-                            <label for="country" class="form-label text-light"><i class="fas fa-globe"></i> País</label>
-                            {{ form.country }}
-                        </div>
-                        <div class="d-flex justify-content-between mt-4">
-                            <button type="submit" class="btn btn-danger px-4"><i class="fas fa-save"></i> Guardar Cambios</button>
-                            <a href="{% url 'home' %}" class="btn btn-outline-light px-4"><i class="fas fa-arrow-left"></i> Volver</a>
-                        </div>
-                    </form>
-                </div>
-            </div>
+<div class="estudify-wrapper">
+  <div class="container py-4">
+    <!-- Header Card -->
+    <div class="profile-header-card mb-4">
+      <div class="profile-avatar">
+        <div class="avatar-circle">
+          <i class="fas fa-user-circle"></i>
         </div>
+      </div>
+      <div class="profile-info">
+        <h1 class="profile-name">Mi Perfil</h1>
+        <div class="profile-badge">
+          <i class="fas fa-id-card"></i> Información personal y de contacto
+        </div>
+        <div class="profile-meta">
+          <span><i class="fas fa-lightbulb"></i> <strong>Consejo:</strong> <em>Mantén tus datos actualizados para una mejor experiencia.</em></span>
+        </div>
+      </div>
     </div>
+
+    <!-- Form Section -->
+    <div class="info-section-card">
+      <div class="info-header">
+        <i class="fas fa-user-edit"></i>
+        <h2>Editar Perfil</h2>
+      </div>
+
+      <div class="form-container p-4">
+        <form method="post">
+          {% csrf_token %}
+
+          <!-- Messages (reutilizando estilo Estudify) -->
+          {% if messages %}
+            {% for message in messages %}
+              <div class="alert alert-dismissible fade show mb-3" role="alert"
+                style="background: rgba(30, 30, 63, 0.7); border-left: 4px solid {% if 'success' in message.tags %}#10b981{% elif 'error' in message.tags %}#ef4444{% else %}#8b5cf6{% endif %}; color: white; border-radius: 10px;">
+                {% if 'success' in message.tags %}
+                  <i class="fas fa-check-circle me-2"></i>
+                {% elif 'error' in message.tags %}
+                  <i class="fas fa-exclamation-circle me-2"></i>
+                {% else %}
+                  <i class="fas fa-info-circle me-2"></i>
+                {% endif %}
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"
+                  style="filter: invert(1); opacity: 0.7;"></button>
+              </div>
+            {% endfor %}
+          {% endif %}
+
+          <!-- Nombre y Apellido -->
+          <div class="row g-3 mb-4">
+            <div class="col-md-6">
+              <label for="id_first_name" class="form-label">Nombre</label>
+              {{ form.first_name }}
+            </div>
+            <div class="col-md-6">
+              <label for="id_last_name" class="form-label">Apellido</label>
+              {{ form.last_name }}
+            </div>
+          </div>
+
+          <!-- Usuario (solo lectura) y Email -->
+          <div class="row g-3 mb-4">
+            <div class="col-md-6">
+              <label class="form-label">Usuario</label>
+              <input type="text" class="form-control-read-only" value="{{ profile.user.username }}" disabled>
+            </div>
+            <div class="col-md-6">
+              <label for="id_email" class="form-label">Email</label>
+              {{ form.email }}
+            </div>
+          </div>
+
+          <hr class="divider">
+
+          <!-- Teléfono y Fecha de nacimiento -->
+          <div class="row g-3 mb-4">
+            <div class="col-md-6">
+              <label for="id_phone" class="form-label">Teléfono</label>
+              {{ form.phone }}
+            </div>
+            <div class="col-md-6">
+              <label for="id_date_of_birth" class="form-label">Fecha de nacimiento</label>
+              {{ form.date_of_birth }}
+            </div>
+          </div>
+
+          <!-- Bio -->
+          <div class="mb-4">
+            <label for="id_bio" class="form-label">Biografía</label>
+            {{ form.bio }}
+          </div>
+
+          <!-- Dirección, Ciudad, País -->
+          <div class="row g-3 mb-4">
+            <div class="col-12">
+              <label for="id_address" class="form-label">Dirección</label>
+              {{ form.address }}
+            </div>
+            <div class="col-md-6">
+              <label for="id_city" class="form-label">Ciudad</label>
+              {{ form.city }}
+            </div>
+            <div class="col-md-6">
+              <label for="id_country" class="form-label">País</label>
+              {{ form.country }}
+            </div>
+          </div>
+
+          <!-- Botones -->
+          <div class="d-flex flex-wrap gap-3 mt-4">
+            <button type="submit" class="btn-submit">
+              <i class="fas fa-save me-2"></i> Guardar Cambios
+            </button>
+            <a href="{% url 'home' %}" class="btn-outline">
+              <i class="fas fa-arrow-left me-2"></i> Volver al inicio
+            </a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
 </div>
+
+<style>
+  /* Heredado del estilo Estudify global */
+  .profile-header-card {
+    background: linear-gradient(135deg, #1e1e3f 0%, #2d2d5a 100%);
+    border-radius: 24px;
+    padding: 2.5rem;
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  .avatar-circle {
+    width: 120px;
+    height: 120px;
+    background: linear-gradient(135deg, #ec4899, #ef4444);
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 16px rgba(236, 72, 153, 0.4);
+  }
+
+  .avatar-circle i {
+    font-size: 3.5rem;
+    color: white;
+  }
+
+  .profile-name {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: white;
+    margin: 0 0 0.75rem 0;
+  }
+
+  .profile-badge {
+    display: inline-block;
+    background: linear-gradient(135deg, #ec4899, #ef4444);
+    color: white;
+    padding: 0.5rem 1.25rem;
+    border-radius: 50px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+  }
+
+  .profile-meta {
+    display: flex;
+    gap: 1.5rem;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.95rem;
+    flex-wrap: wrap;
+  }
+
+  .profile-meta i {
+    color: #fbbf24;
+  }
+
+  /* Form Section */
+  .info-section-card {
+    background: linear-gradient(135deg, #1e1e3f 0%, #2d2d5a 100%);
+    border-radius: 16px;
+    padding: 0;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  }
+
+  .info-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  .info-header i {
+    font-size: 1.75rem;
+    color: #ec4899;
+  }
+
+  .info-header h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: white;
+    margin: 0;
+  }
+
+  .form-container {
+    background: rgba(30, 30, 63, 0.6);
+  }
+
+  /* Form Controls */
+  .form-label {
+    display: block;
+    font-weight: 600;
+    color: white;
+    margin-bottom: 0.5rem;
+    font-size: 0.95rem;
+  }
+
+  input[type="text"],
+  input[type="email"],
+  input[type="tel"],
+  input[type="date"],
+  textarea,
+  select {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    background: rgba(0, 0, 0, 0.2);
+    color: white;
+    font-size: 1rem;
+    transition: all 0.25s ease;
+  }
+
+  input:focus,
+  textarea:focus,
+  select:focus {
+    outline: none;
+    border-color: #ec4899;
+    box-shadow: 0 0 0 3px rgba(236, 72, 153, 0.2);
+    background: rgba(0, 0, 0, 0.3);
+  }
+
+  textarea {
+    min-height: 100px;
+    resize: vertical;
+  }
+
+  /* Disabled (read-only) */
+  .form-control-read-only {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(50, 50, 80, 0.4);
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 1rem;
+    cursor: not-allowed;
+  }
+
+  /* Divider */
+  .divider {
+    border: 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    margin: 1.5rem 0;
+  }
+
+  /* Buttons */
+  .btn-submit {
+    background: linear-gradient(135deg, #ec4899, #ef4444);
+    color: white;
+    border: none;
+    padding: 0.85rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    box-shadow: 0 4px 16px rgba(236, 72, 153, 0.3);
+  }
+
+  .btn-submit:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(236, 72, 153, 0.5);
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+  }
+
+  .btn-outline {
+    background: transparent;
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 0.85rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    border-radius: 12px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .btn-outline:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.4);
+    transform: translateY(-2px);
+  }
+
+  /* Error Lists (Django) */
+  ul.errorlist {
+    color: #f87171;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+    padding-left: 1rem;
+  }
+
+  @media (max-width: 768px) {
+    .profile-header-card {
+      flex-direction: column;
+      text-align: center;
+      padding: 2rem;
+    }
+
+    .profile-name {
+      font-size: 1.75rem;
+    }
+
+    .btn-submit, .btn-outline {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+</style>
 {% endblock %}

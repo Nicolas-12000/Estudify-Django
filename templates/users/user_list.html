@@ -1,64 +1,442 @@
 {% extends "base.html" %}
 {% block title %}Usuarios - Estudify{% endblock %}
 {% block content %}
-<h2 class="mb-4 text-accent"><i class="fas fa-users"></i> Gestión de Usuarios</h2>
-<div class="card bg-dark shadow border-secondary">
-    <div class="card-header bg-dark text-light">
-        <form class="row g-2" method="get">
-            <div class="col-lg-4">
-                <input type="text" name="search" class="form-control" value="{{ request.GET.search }}" placeholder="Buscar usuario...">
-            </div>
-            <div class="col-lg-3">
-                <select name="role" class="form-control">
-                    <option value="">Todos los roles</option>
-                    {% for val, label in role_choices %}
-                        <option value="{{ val }}" {% if request.GET.role == val %}selected{% endif %}>{{ label }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="col-lg-2">
-                <button type="submit" class="btn btn-danger w-100"><i class="fas fa-search"></i> Filtrar</button>
-            </div>
-        </form>
+<div class="estudify-wrapper">
+  <div class="container py-4">
+    <!-- Header Card -->
+    <div class="profile-header-card mb-4">
+      <div class="profile-avatar">
+        <div class="avatar-circle">
+          <i class="fas fa-users"></i>
+        </div>
+      </div>
+      <div class="profile-info">
+        <h1 class="profile-name">Gestión de Usuarios</h1>
+        <div class="profile-badge">
+          <i class="fas fa-shield-alt"></i> Administración segura y centralizada
+        </div>
+        <div class="profile-meta">
+          <span><i class="fas fa-lightbulb"></i> <strong>Consejo:</strong> <em>Un equipo bien gestionado es la base de una comunidad educativa fuerte.</em></span>
+        </div>
+      </div>
     </div>
-    <div class="card-body">
-        <table class="table table-dark table-striped table-hover align-middle">
+
+    <!-- Filters Card -->
+    <div class="info-section-card mb-4">
+      <div class="info-header">
+        <i class="fas fa-filter"></i>
+        <h2>Filtros</h2>
+      </div>
+      <div class="p-3">
+        <form method="get" class="row g-3">
+          <div class="col-lg-4 col-md-6">
+            <label class="form-label visually-hidden">Buscar</label>
+            <input type="text" name="search" class="form-control" value="{{ request.GET.search|default:'' }}" placeholder="Buscar usuario...">
+          </div>
+          <div class="col-lg-3 col-md-6">
+            <label class="form-label visually-hidden">Rol</label>
+            <select name="role" class="form-control">
+              <option value="">Todos los roles</option>
+              {% for val, label in role_choices %}
+                <option value="{{ val }}" {% if request.GET.role == val %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-lg-2 col-md-6 d-flex align-items-end">
+            <button type="submit" class="btn-submit w-100">
+              <i class="fas fa-search me-2"></i> Filtrar
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Results -->
+    <div class="info-section-card">
+      <div class="info-header">
+        <i class="fas fa-table"></i>
+        <h2>Listado de Usuarios</h2>
+        <span class="ms-auto badge bg-purple-light text-purple">{{ users.paginator.count|default:users|length }} usuarios</span>
+      </div>
+
+      {% if users %}
+        <div class="table-responsive">
+          <table class="estudify-table">
             <thead>
-                <tr>
-                    <th>Usuario</th>
-                    <th>Nombre</th>
-                    <th>Email</th>
-                    <th>Rol</th>
-                    <th>Activo</th>
-                    <th>Acciones</th>
-                </tr>
+              <tr>
+                <th>Usuario</th>
+                <th>Nombre</th>
+                <th>Email</th>
+                <th>Rol</th>
+                <th>Activo</th>
+                <th>Acciones</th>
+              </tr>
             </thead>
             <tbody>
-                {% for user in users %}
+              {% for user in users %}
                 <tr>
-                    <td>{{ user.username }}</td>
-                    <td>{{ user.get_full_name }}</td>
-                    <td>{{ user.email }}</td>
-                    <td>{{ user.get_role_display }}</td>
-                    <td>
-                        {% if user.is_active %}
-                            <span class="badge bg-success">Sí</span>
-                        {% else %}
-                            <span class="badge bg-danger">No</span>
-                        {% endif %}
-                    </td>
-                    <td>
-                        <a href="{% url 'users:user_detail' user.id %}" class="btn btn-outline-info btn-sm"><i class="fas fa-eye"></i></a>
-                        <a href="{% url 'users:toggle_status' user.id %}" class="btn btn-outline-warning btn-sm">
-                            {% if user.is_active %}<i class="fas fa-user-slash"></i>{% else %}<i class="fas fa-user-check"></i>{% endif %}
-                        </a>
-                    </td>
+                  <td><code>{{ user.username }}</code></td>
+                  <td>{{ user.get_full_name|default:"—" }}</td>
+                  <td>{{ user.email|default:"—"</td>
+                  <td><span class="role-badge">{{ user.get_role_display }}</span></td>
+                  <td>
+                    {% if user.is_active %}
+                      <span class="status-badge status-active">Activo</span>
+                    {% else %}
+                      <span class="status-badge status-inactive">Inactivo</span>
+                    {% endif %}
+                  </td>
+                  <td class="action-cell">
+                    <a href="{% url 'users:user_detail' user.id %}" class="btn-icon btn-blue" title="Ver detalle">
+                      <i class="fas fa-eye"></i>
+                    </a>
+                    <a href="{% url 'users:toggle_status' user.id %}" class="btn-icon {% if user.is_active %}btn-orange{% else %}btn-green{% endif %}"
+                       title="{% if user.is_active %}Desactivar{% else %}Activar{% endif %}">
+                      {% if user.is_active %}
+                        <i class="fas fa-user-slash"></i>
+                      {% else %}
+                        <i class="fas fa-user-check"></i>
+                      {% endif %}
+                    </a>
+                  </td>
                 </tr>
-                {% empty %}
-                <tr><td colspan="6" class="text-center text-warning">No hay usuarios registrados.</td></tr>
-                {% endfor %}
+              {% endfor %}
             </tbody>
-        </table>
+          </table>
+        </div>
+
+        <!-- Pagination (si usas Paginator) -->
+        {% if users.has_other_pages %}
+          <div class="pagination-controls mt-4">
+            <nav aria-label="Paginación">
+              <ul class="pagination justify-content-center">
+                {% if users.has_previous %}
+                  <li class="page-item">
+                    <a class="page-link" href="?page=1{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.role %}&role={{ request.GET.role }}{% endif %}">Primera</a>
+                  </li>
+                  <li class="page-item">
+                    <a class="page-link" href="?page={{ users.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.role %}&role={{ request.GET.role }}{% endif %}">«</a>
+                  </li>
+                {% endif %}
+
+                {% for num in users.paginator.page_range %}
+                  {% if users.number == num %}
+                    <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                  {% elif num > users.number|add:'-3' and num < users.number|add:'3' %}
+                    <li class="page-item">
+                      <a class="page-link" href="?page={{ num }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.role %}&role={{ request.GET.role }}{% endif %}">{{ num }}</a>
+                    </li>
+                  {% endif %}
+                {% endfor %}
+
+                {% if users.has_next %}
+                  <li class="page-item">
+                    <a class="page-link" href="?page={{ users.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.role %}&role={{ request.GET.role }}{% endif %}">»</a>
+                  </li>
+                  <li class="page-item">
+                    <a class="page-link" href="?page={{ users.paginator.num_pages }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.role %}&role={{ request.GET.role }}{% endif %}">Última</a>
+                  </li>
+                {% endif %}
+              </ul>
+            </nav>
+          </div>
+        {% endif %}
+
+      {% else %}
+        <div class="empty-state py-5 text-center">
+          <i class="fas fa-users-slash fa-3x mb-3 opacity-50"></i>
+          <h4 class="text-light">No hay usuarios registrados.</h4>
+          <p class="text-muted mt-2">Intenta ajustar los filtros o crea un nuevo usuario.</p>
+        </div>
+      {% endif %}
     </div>
+  </div>
 </div>
+
+<style>
+  /* --- Estilos Estudify — seguros para linting --- */
+  .profile-header-card {
+    background: linear-gradient(135deg, #1e1e3f 0%, #2d2d5a 100%);
+    border-radius: 24px;
+    padding: 2.5rem;
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  .avatar-circle {
+    width: 120px;
+    height: 120px;
+    background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 16px rgba(139, 92, 246, 0.4);
+  }
+
+  .avatar-circle i {
+    font-size: 3.5rem;
+    color: white;
+  }
+
+  .profile-name {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: white;
+    margin: 0 0 0.75rem 0;
+  }
+
+  .profile-badge {
+    display: inline-block;
+    background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+    color: white;
+    padding: 0.5rem 1.25rem;
+    border-radius: 50px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+  }
+
+  .profile-meta {
+    display: flex;
+    gap: 1.5rem;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.95rem;
+    flex-wrap: wrap;
+  }
+
+  .profile-meta i {
+    color: #fbbf24;
+  }
+
+  .info-section-card {
+    background: linear-gradient(135deg, #1e1e3f 0%, #2d2d5a 100%);
+    border-radius: 16px;
+    padding: 0;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  }
+
+  .info-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  .info-header i {
+    font-size: 1.75rem;
+    color: #8b5cf6;
+  }
+
+  .info-header h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: white;
+    margin: 0;
+  }
+
+  .badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+
+  .bg-purple-light {
+    background: rgba(139, 92, 246, 0.15);
+  }
+  .text-purple {
+    color: #c084fc;
+  }
+
+  /* Form Controls */
+  .form-control {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    background: rgba(0, 0, 0, 0.2);
+    color: white;
+    font-size: 1rem;
+  }
+
+  .form-control:focus {
+    outline: none;
+    border-color: #8b5cf6;
+    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2);
+    background: rgba(0, 0, 0, 0.3);
+  }
+
+  /* Submit Button */
+  .btn-submit {
+    background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+    color: white;
+    border: none;
+    padding: 0.85rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.25);
+  }
+
+  .btn-submit:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(139, 92, 246, 0.4);
+  }
+
+  /* Table */
+  .estudify-table {
+    width: 100%;
+    border-collapse: collapse;
+    color: #e2e8f0;
+    margin-top: 1rem;
+  }
+
+  .estudify-table thead th {
+    background: rgba(30, 30, 63, 0.8);
+    padding: 1rem 1.25rem;
+    text-align: left;
+    font-weight: 700;
+    color: #cbd5e1;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .estudify-table tbody td {
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  .estudify-table tbody tr:hover {
+    background: rgba(50, 50, 100, 0.2);
+  }
+
+  code {
+    background: rgba(0, 0, 0, 0.3);
+    padding: 0.15rem 0.4rem;
+    border-radius: 6px;
+    font-size: 0.9rem;
+  }
+
+  /* Badges */
+  .role-badge {
+    display: inline-block;
+    background: rgba(99, 102, 241, 0.15);
+    color: #818cf8;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+
+  .status-badge {
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.85rem;
+  }
+
+  .status-active {
+    background: rgba(16, 185, 129, 0.15);
+    color: #34d399;
+  }
+
+  .status-inactive {
+    background: rgba(239, 68, 68, 0.15);
+    color: #f87171;
+  }
+
+  /* Action Buttons */
+  .action-cell {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .btn-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    text-decoration: none;
+    transition: all 0.2s ease;
+  }
+
+  .btn-blue { background: rgba(59, 130, 246, 0.2); }
+  .btn-blue:hover { background: #3b82f6; transform: scale(1.05); }
+
+  .btn-orange { background: rgba(249, 115, 22, 0.2); }
+  .btn-orange:hover { background: #f97316; transform: scale(1.05); }
+
+  .btn-green { background: rgba(34, 197, 94, 0.2); }
+  .btn-green:hover { background: #22c55e; transform: scale(1.05); }
+
+  .btn-icon i {
+    font-size: 1rem;
+  }
+
+  /* Empty State */
+  .empty-state {
+    color: rgba(255, 255, 255, 0.6);
+  }
+
+  .empty-state i {
+    color: rgba(255, 255, 255, 0.2);
+  }
+
+  /* Pagination */
+  .pagination-controls .pagination {
+    --bs-pagination-color: #cbd5e1;
+    --bs-pagination-bg: rgba(30, 30, 63, 0.6);
+    --bs-pagination-border-color: rgba(255, 255, 255, 0.1);
+    --bs-pagination-hover-color: white;
+    --bs-pagination-hover-bg: rgba(139, 92, 246, 0.3);
+    --bs-pagination-hover-border-color: rgba(255, 255, 255, 0.2);
+    --bs-pagination-active-color: white;
+    --bs-pagination-active-bg: #8b5cf6;
+    --bs-pagination-active-border-color: #8b5cf6;
+    --bs-pagination-disabled-color: #64748b;
+    --bs-pagination-disabled-bg: rgba(30, 30, 63, 0.4);
+  }
+
+  .pagination .page-link {
+    border-radius: 8px !important;
+    margin: 0 0.15rem;
+    padding: 0.4rem 0.75rem;
+  }
+
+  @media (max-width: 768px) {
+    .profile-header-card {
+      flex-direction: column;
+      text-align: center;
+      padding: 2rem;
+    }
+
+    .profile-name {
+      font-size: 1.75rem;
+    }
+
+    .action-cell {
+      flex-wrap: wrap;
+    }
+
+    .btn-icon {
+      width: 32px;
+      height: 32px;
+    }
+  }
+</style>
 {% endblock %}

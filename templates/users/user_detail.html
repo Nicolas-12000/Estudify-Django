@@ -1,35 +1,255 @@
 {% extends "base.html" %}
 {% block title %}Detalle Usuario - Estudify{% endblock %}
 {% block content %}
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-md-7">
-            <div class="card bg-dark shadow border-secondary">
-                <div class="card-header bg-info text-white">
-                    <h3 class="mb-0"><i class="fas fa-user"></i> Detalle de Usuario</h3>
-                </div>
-                <div class="card-body">
-                    <ul class="list-group list-group-flush">
-                        <li class="list-group-item bg-dark text-light"><b>Usuario:</b> {{ user_obj.username }}</li>
-                        <li class="list-group-item bg-dark text-light"><b>Nombre completo:</b> {{ user_obj.get_full_name }}</li>
-                        <li class="list-group-item bg-dark text-light"><b>Email:</b> {{ user_obj.email }}</li>
-                        <li class="list-group-item bg-dark text-light"><b>Rol:</b> {{ user_obj.get_role_display }}</li>
-                        <li class="list-group-item bg-dark text-light"><b>Teléfono:</b> {{ user_obj.phone }}</li>
-                        <li class="list-group-item bg-dark text-light"><b>Estado:</b>
-                            {% if user_obj.is_active %}
-                                <span class="badge bg-success">Activo</span>
-                            {% else %}
-                                <span class="badge bg-danger">Inactivo</span>
-                            {% endif %}
-                        </li>
-                        <li class="list-group-item bg-dark text-light"><b>Fecha de registro:</b> {{ user_obj.date_joined }}</li>
-                    </ul>
-                    <div class="mt-4">
-                        <a href="{% url 'users:user_list' %}" class="btn btn-outline-light"><i class="fas fa-arrow-left"></i> Volver</a>
-                    </div>
-                </div>
-            </div>
+<div class="estudify-wrapper">
+  <div class="container py-4">
+    <!-- Header Card -->
+    <div class="profile-header-card mb-4">
+      <div class="profile-avatar">
+        <div class="avatar-circle">
+          <i class="fas fa-user"></i>
         </div>
+      </div>
+      <div class="profile-info">
+        <h1 class="profile-name">Detalle de Usuario</h1>
+        <div class="profile-badge">
+          <i class="fas fa-id-badge"></i> Información detallada
+        </div>
+        <div class="profile-meta">
+          <span><i class="fas fa-lightbulb"></i> <strong>Consejo:</strong> <em>Conoce los roles y accesos de cada miembro de la comunidad.</em></span>
+        </div>
+      </div>
     </div>
+
+    <!-- Info Section -->
+    <div class="info-section-card">
+      <div class="info-header">
+        <i class="fas fa-user-circle"></i>
+        <h2>{{ user_obj.get_full_name|default:user_obj.username }}</h2>
+      </div>
+
+      <div class="user-detail-grid">
+        <div class="detail-item">
+          <span class="detail-label">Usuario</span>
+          <span class="detail-value">{{ user_obj.username }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Nombre completo</span>
+          <span class="detail-value">{{ user_obj.get_full_name }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Email</span>
+          <span class="detail-value">{{ user_obj.email }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Rol</span>
+          <span class="detail-value">{{ user_obj.get_role_display }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Teléfono</span>
+          <span class="detail-value">{{ user_obj.phone|default:"—"</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Estado</span>
+          <span class="detail-value">
+            {% if user_obj.is_active %}
+              <span class="badge-success">Activo</span>
+            {% else %}
+              <span class="badge-danger">Inactivo</span>
+            {% endif %}
+          </span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Fecha de registro</span>
+          <span class="detail-value">{{ user_obj.date_joined|date:"d M Y H:i" }}</span>
+        </div>
+      </div>
+
+      <div class="mt-4 text-center">
+        <a href="{% url 'users:user_list' %}" class="btn-outline">
+          <i class="fas fa-arrow-left me-2"></i> Volver al listado
+        </a>
+      </div>
+    </div>
+  </div>
 </div>
+
+<style>
+  /* Estilos Estudify — sin Django tags en CSS */
+  .profile-header-card {
+    background: linear-gradient(135deg, #1e1e3f 0%, #2d2d5a 100%);
+    border-radius: 24px;
+    padding: 2.5rem;
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  .avatar-circle {
+    width: 120px;
+    height: 120px;
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 16px rgba(59, 130, 246, 0.4);
+  }
+
+  .avatar-circle i {
+    font-size: 3.5rem;
+    color: white;
+  }
+
+  .profile-name {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: white;
+    margin: 0 0 0.75rem 0;
+  }
+
+  .profile-badge {
+    display: inline-block;
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    color: white;
+    padding: 0.5rem 1.25rem;
+    border-radius: 50px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+  }
+
+  .profile-meta {
+    display: flex;
+    gap: 1.5rem;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.95rem;
+    flex-wrap: wrap;
+  }
+
+  .profile-meta i {
+    color: #fbbf24;
+  }
+
+  .info-section-card {
+    background: linear-gradient(135deg, #1e1e3f 0%, #2d2d5a 100%);
+    border-radius: 16px;
+    padding: 2rem;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  }
+
+  .info-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .info-header i {
+    font-size: 1.75rem;
+    color: #3b82f6;
+  }
+
+  .info-header h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: white;
+    margin: 0;
+  }
+
+  /* User Detail Grid */
+  .user-detail-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .detail-item {
+    background: rgba(30, 30, 63, 0.4);
+    border-radius: 12px;
+    padding: 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  .detail-label {
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.6);
+    display: block;
+    margin-bottom: 0.25rem;
+  }
+
+  .detail-value {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: white;
+    word-break: break-word;
+  }
+
+  /* Badges */
+  .badge-success {
+    display: inline-block;
+    background: rgba(16, 185, 129, 0.2);
+    color: #34d399;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.9rem;
+  }
+
+  .badge-danger {
+    display: inline-block;
+    background: rgba(239, 68, 68, 0.2);
+    color: #f87171;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.9rem;
+  }
+
+  /* Button */
+  .btn-outline {
+    background: transparent;
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 0.85rem 1.75rem;
+    font-size: 1rem;
+    font-weight: 600;
+    border-radius: 12px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .btn-outline:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.4);
+    transform: translateY(-2px);
+  }
+
+  @media (max-width: 768px) {
+    .profile-header-card {
+      flex-direction: column;
+      text-align: center;
+      padding: 2rem;
+    }
+
+    .profile-name {
+      font-size: 1.75rem;
+    }
+
+    .user-detail-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .btn-outline {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+</style>
 {% endblock %}
