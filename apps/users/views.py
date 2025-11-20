@@ -200,4 +200,4 @@ def toggle_user_status(request, pk):
         user.is_active = True
         messages.success(request, f'Usuario {user.username} activado.')
     user.save()
-    return redirect('users:user_list')
+    return redirect('users:user_loging')
