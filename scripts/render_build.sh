@@ -3,14 +3,33 @@ set -o errexit
 
 echo "🚀 Iniciando build de Estudify (Render) ..."
 
-echo "📦 Actualizando pip e instalando dependencias..."
-python -m pip install --upgrade pip
-python -m pip install -r requirements.txt
+# ──────────────────────────────────────────────────────
+# INSTALAR DEPENDENCIAS
+# ──────────────────────────────────────────────────────
+echo "📦 Instalando dependencias del proyecto..."
+pip install --upgrade pip
+pip install -r requirements.txt
 
+# ──────────────────────────────────────────────────────
+# MIGRACIONES
+# ──────────────────────────────────────────────────────
+echo "🗄️ Ejecutando migraciones..."
+python manage.py migrate --no-input
+
+# ──────────────────────────────────────────────────────
+# CREAR ADMIN AUTOMÁTICAMENTE (opcional por env var)
+# ──────────────────────────────────────────────────────
+if [ "${SEED_INITIAL_DATA:-0}" = "1" ]; then
+  echo "🌱 Ejecutando seed de datos iniciales..."
+  python manage.py seed_initial_data || true
+else
+  echo "⚠️ Seed inicial deshabilitado. Para activarlo usa SEED_INITIAL_DATA=1"
+fi
+
+# ──────────────────────────────────────────────────────
+# ARCHIVOS ESTÁTICOS
+# ──────────────────────────────────────────────────────
 echo "📁 Recolectando archivos estáticos..."
 python manage.py collectstatic --no-input
 
-echo "🗄️ Ejecutando migraciones de base de datos..."
-python manage.py migrate --no-input
-
-echo "✅ Build completado exitosamente!"
+echo "🎉 Build completado exitosamente!"
