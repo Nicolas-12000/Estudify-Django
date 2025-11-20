@@ -10,6 +10,8 @@ from decouple import Csv, config
 
 import os 
 
+import dj_database_url
+
 # Build paths
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -91,10 +93,11 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # Default: sqlite for local development. In production use DATABASE_URL
 # (Postgres).
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+    "default": dj_database_url.config(
+        default=os.environ.get("DATABASE_URL"),
+        conn_max_age=600,
+        ssl_require=True
+    )
 }
 
 # When using the default SQLite DB for development/CI, increase the timeout
