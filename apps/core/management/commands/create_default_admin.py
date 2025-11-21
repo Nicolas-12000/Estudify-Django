@@ -1,13 +1,19 @@
+from django.core.management.base import BaseCommand
 from django.contrib.auth import get_user_model
 
-def create_default_admin():
-    User = get_user_model()
-    if not User.objects.filter(username="admin").exists():
-        User.objects.create_superuser(
-            username="admin",
-            email="admin@gmail.com",
-            password="admin123"
-        )
-        print("✔ Default admin created")
-    else:
-        print("ℹ Admin user already exists")
+
+class Command(BaseCommand):
+    help = "Create default admin user if not exists"
+
+    def handle(self, *args, **kwargs):
+        User = get_user_model()
+
+        if not User.objects.filter(username="admin").exists():
+            User.objects.create_superuser(
+                username="admin",
+                email="admin@gmail.com",
+                password="admin123",
+            )
+            self.stdout.write(self.style.SUCCESS("✔ Admin created"))
+        else:
+            self.stdout.write("ℹ Admin already exists")
