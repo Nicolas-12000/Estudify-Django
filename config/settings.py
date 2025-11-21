@@ -21,6 +21,14 @@ ALLOWED_HOSTS = [
     ".onrender.com",
 ]
 
+# Render requiere esto para redirigir HTTPS correctamente
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+# Evita errores de CSRF en Render
+CSRF_TRUSTED_ORIGINS = [
+    "https://*.onrender.com",
+]
+
 # APPLICATIONS
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -49,7 +57,7 @@ INSTALLED_APPS = [
     "apps.api",
 ]
 
-PIPELINE = {}  # evita errores por inspección interna de pipeline
+PIPELINE = {}  # Evita errores por inspección interna de pipeline
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -64,17 +72,18 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = "config.urls"
+
 TEMPLATES = [
     {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / "templates"],
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.debug',
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "DIRS": [BASE_DIR / "templates"],
+        "APP_DIRS": True,
+        "OPTIONS": {
+            "context_processors": [
+                "django.template.context_processors.debug",
+                "django.template.context_processors.request",
+                "django.contrib.auth.context_processors.auth",
+                "django.contrib.messages.context_processors.messages",
             ],
         },
     },
@@ -82,12 +91,12 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "config.wsgi.application"
 
-# DATABASE (PostgreSQL en Render, SQLite en local)
+# DATABASE (Render usa DATABASE_URL)
 DATABASES = {
     "default": dj_database_url.config(
-        default=config("DATABASE_URL", default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}"),
-        conn_max_age=600,
-        ssl_require=not DEBUG
+        default=config("DATABASE_URL", default="postgres://user:pass@localhost:5432/estudify"),
+        conn_max_age=0,         # Render requiere conexiones no persistentes
+        ssl_require=True,       # Fuerza SSL (evita 'bad record mac')
     )
 }
 
@@ -159,11 +168,12 @@ CELERY_BROKER_URL = config("CELERY_BROKER_URL", default="redis://localhost:6379/
 CELERY_RESULT_BACKEND = config("CELERY_RESULT_BACKEND", default="redis://localhost:6379/0")
 CELERY_TIMEZONE = TIME_ZONE
 
-# SECURITY (only when DEBUG=False)
+# SECURITY (mejorado para Render)
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+
 if not DEBUG:
     SECURE_SSL_REDIRECT = True
-    SESSION_COOKIE_SECURE = True
-    CSRF_COOKIE_SECURE = True
     SECURE_BROWSER_XSS_FILTER = True
     SECURE_CONTENT_TYPE_NOSNIFF = True
     X_FRAME_OPTIONS = "DENY"
