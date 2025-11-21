@@ -116,16 +116,13 @@ def login_view(request):
                     user = None
             if user is not None:
                 login(request, user)
-                messages.success(request, f'Bienvenido, {user.get_full_name()}!')
-                if user.is_admin_role or user.is_staff:
+                messages.success(request, f'Bienvenido, {user.get_full_name()}!!')
+                
+                if user.is_superuser or user.is_staff or getattr(user, "is_admin_role", False):
                     return redirect('panel_admin')
-                elif user.role == User.UserRole.TEACHER:
-                    return redirect('panel_profesor')
-                elif user.role == User.UserRole.STUDENT:
-                    return redirect('panel_estudiante')
-                next_url = request.GET.get('next', 'home')
-                return redirect(next_url)
-    else:
+
+    
+
         form = UserLoginForm()
     return render(request, 'users/login.html', {'form': form})
 
